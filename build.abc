@@ -8,6 +8,7 @@ sources = ["src/main.npk"]
 deps = []
 flags = [
     "-O2",
+    "-I", "src",
     "-I", "/home/randy/Workspace/REPOS/nitpick-packages/packages/nitpick-tui/src",
     "-I", "/home/randy/Workspace/REPOS/nitpick-packages/packages/nitpick-input/src",
     "-I", "/home/randy/Workspace/REPOS/nitpick-packages/packages/nitpick-fs/src"
@@ -20,6 +21,20 @@ type = "binary"
 sources = ["tests/test_main.npk"]
 deps = []
 flags = [
+    "-I", "src",
+    "-I", "/home/randy/Workspace/REPOS/nitpick-packages/packages/nitpick-tui/src",
+    "-I", "/home/randy/Workspace/REPOS/nitpick-packages/packages/nitpick-input/src",
+    "-I", "/home/randy/Workspace/REPOS/nitpick-packages/packages/nitpick-fs/src"
+]
+link_libraries = []
+link_paths = []
+
+[target.test-buffer]
+type = "binary"
+sources = ["tests/test_buffer.npk"]
+deps = []
+flags = [
+    "-I", "src",
     "-I", "/home/randy/Workspace/REPOS/nitpick-packages/packages/nitpick-tui/src",
     "-I", "/home/randy/Workspace/REPOS/nitpick-packages/packages/nitpick-input/src",
     "-I", "/home/randy/Workspace/REPOS/nitpick-packages/packages/nitpick-fs/src"

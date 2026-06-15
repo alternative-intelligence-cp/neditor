@@ -1,0 +1,72 @@
+pub struct:TextBuffer = {
+    string[1024]:lines;
+    int32:count;
+};
+
+pub func:buffer_init = TextBuffer() {
+    TextBuffer:buf;
+    buf.count = 1i32;
+    buf.lines[0] = "";
+    pass(buf);
+};
+
+pub func:buffer_insert_line = TextBuffer(TextBuffer:buf, int32:index, string:text) {
+    if (index < 0i32) {
+        pass(buf);
+    }
+    if (index > buf.count) {
+        index = buf.count;
+    }
+    if (buf.count >= 1024i32) {
+        pass(buf);
+    }
+    
+    int32:i = buf.count;
+    while (i > index) {
+        buf.lines[i] = buf.lines[i - 1i32];
+        i = i - 1i32;
+    }
+    buf.lines[index] = text;
+    buf.count = buf.count + 1i32;
+    pass(buf);
+};
+
+pub func:buffer_delete_line = TextBuffer(TextBuffer:buf, int32:index) {
+    if (index < 0i32) {
+        pass(buf);
+    }
+    if (index >= buf.count) {
+        pass(buf);
+    }
+    
+    int32:i = index;
+    while (i < buf.count - 1i32) {
+        buf.lines[i] = buf.lines[i + 1i32];
+        i = i + 1i32;
+    }
+    buf.count = buf.count - 1i32;
+    if (buf.count == 0i32) {
+        buf.count = 1i32;
+        buf.lines[0] = "";
+    }
+    pass(buf);
+};
+
+pub func:buffer_get_line = string(TextBuffer:buf, int32:index) {
+    if (index < 0i32) {
+        pass("");
+    }
+    if (index >= buf.count) {
+        pass("");
+    }
+    pass(buf.lines[index]);
+};
+
+pub func:buffer_set_line = TextBuffer(TextBuffer:buf, int32:index, string:text) {
+    if (index >= 0i32) {
+        if (index < buf.count) {
+            buf.lines[index] = text;
+        }
+    }
+    pass(buf);
+};

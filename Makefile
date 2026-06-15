@@ -8,6 +8,7 @@ build:
 test:
 	/home/randy/Workspace/REPOS/nitpick-build/build/npkbld test
 	./.nitpick_make/build/test-neditor
+	./.nitpick_make/build/test-buffer
 
 clean:
 	rm -rf .nitpick_make

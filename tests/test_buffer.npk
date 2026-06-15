@@ -1,0 +1,33 @@
+use "../src/core/buffer.npk".*;
+
+func:main = int32() {
+    TextBuffer:buf = raw buffer_init();
+    
+    if (buf.count != 1i32) { exit 1i32; }
+    if (raw buffer_get_line(buf, 0i32) != "") { exit 2i32; }
+    
+    buf = raw buffer_set_line(buf, 0i32, "hello");
+    if (raw buffer_get_line(buf, 0i32) != "hello") { exit 3i32; }
+    
+    buf = raw buffer_insert_line(buf, 1i32, "world");
+    if (buf.count != 2i32) { exit 4i32; }
+    if (raw buffer_get_line(buf, 1i32) != "world") { exit 5i32; }
+    
+    buf = raw buffer_insert_line(buf, 0i32, "first");
+    if (buf.count != 3i32) { exit 6i32; }
+    if (raw buffer_get_line(buf, 0i32) != "first") { exit 7i32; }
+    if (raw buffer_get_line(buf, 1i32) != "hello") { exit 8i32; }
+    if (raw buffer_get_line(buf, 2i32) != "world") { exit 9i32; }
+    
+    buf = raw buffer_delete_line(buf, 1i32);
+    if (buf.count != 2i32) { exit 10i32; }
+    if (raw buffer_get_line(buf, 0i32) != "first") { exit 11i32; }
+    if (raw buffer_get_line(buf, 1i32) != "world") { exit 12i32; }
+    
+    buf = raw buffer_delete_line(buf, 0i32);
+    buf = raw buffer_delete_line(buf, 0i32);
+    if (buf.count != 1i32) { exit 13i32; }
+    if (raw buffer_get_line(buf, 0i32) != "") { exit 14i32; }
+    
+    exit 0i32;
+};
