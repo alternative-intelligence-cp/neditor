@@ -3,6 +3,7 @@ use "../src/core/buffer.npk".*;
 func:main = int32() {
     TextBuffer:buf = raw buffer_init();
     
+    // Existing buffer tests
     if (buf.count != 1i32) { exit 1i32; }
     if (raw buffer_get_line(buf, 0i32) != "") { exit 2i32; }
     
@@ -13,21 +14,46 @@ func:main = int32() {
     if (buf.count != 2i32) { exit 4i32; }
     if (raw buffer_get_line(buf, 1i32) != "world") { exit 5i32; }
     
-    buf = raw buffer_insert_line(buf, 0i32, "first");
-    if (buf.count != 3i32) { exit 6i32; }
-    if (raw buffer_get_line(buf, 0i32) != "first") { exit 7i32; }
-    if (raw buffer_get_line(buf, 1i32) != "hello") { exit 8i32; }
-    if (raw buffer_get_line(buf, 2i32) != "world") { exit 9i32; }
+    // Cursor bounds clamping
+    buf.cursor.row = 5i32;
+    buf.cursor.col = 10i32;
+    buf = raw buffer_clamp_cursor(buf);
+    if (buf.cursor.row != 1i32) { exit 6i32; }
+    if (buf.cursor.col != 5i32) { exit 7i32; }
     
-    buf = raw buffer_delete_line(buf, 1i32);
-    if (buf.count != 2i32) { exit 10i32; }
-    if (raw buffer_get_line(buf, 0i32) != "first") { exit 11i32; }
-    if (raw buffer_get_line(buf, 1i32) != "world") { exit 12i32; }
+    // Test cursor insertion
+    buf.cursor.row = 0i32;
+    buf.cursor.col = 5i32;
+    buf = raw buffer_insert_char_at_cursor(buf, "!");
+    if (raw buffer_get_line(buf, 0i32) != "hello!") { exit 8i32; }
+    if (buf.cursor.col != 6i32) { exit 9i32; }
     
-    buf = raw buffer_delete_line(buf, 0i32);
-    buf = raw buffer_delete_line(buf, 0i32);
-    if (buf.count != 1i32) { exit 13i32; }
-    if (raw buffer_get_line(buf, 0i32) != "") { exit 14i32; }
+    buf.cursor.col = 0i32;
+    buf = raw buffer_insert_char_at_cursor(buf, "O");
+    if (raw buffer_get_line(buf, 0i32) != "Ohello!") { exit 10i32; }
+    if (buf.cursor.col != 1i32) { exit 11i32; }
+    
+    // Test cursor deletion (backspace)
+    buf = raw buffer_delete_char_at_cursor(buf);
+    if (raw buffer_get_line(buf, 0i32) != "hello!") { exit 12i32; }
+    if (buf.cursor.col != 0i32) { exit 13i32; }
+    
+    // Delete at start of line 1 (pulls line 1 up to line 0)
+    buf.cursor.row = 1i32;
+    buf.cursor.col = 0i32;
+    buf = raw buffer_delete_char_at_cursor(buf);
+    if (buf.count != 1i32) { exit 14i32; }
+    if (raw buffer_get_line(buf, 0i32) != "hello!world") { exit 15i32; }
+    if (buf.cursor.row != 0i32) { exit 16i32; }
+    if (buf.cursor.col != 6i32) { exit 17i32; }
+    
+    // Test newline at cursor
+    buf = raw buffer_newline_at_cursor(buf);
+    if (buf.count != 2i32) { exit 18i32; }
+    if (raw buffer_get_line(buf, 0i32) != "hello!") { exit 19i32; }
+    if (raw buffer_get_line(buf, 1i32) != "world") { exit 20i32; }
+    if (buf.cursor.row != 1i32) { exit 21i32; }
+    if (buf.cursor.col != 0i32) { exit 22i32; }
     
     exit 0i32;
 };
