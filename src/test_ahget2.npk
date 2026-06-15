@@ -1,0 +1,6 @@
+func:failsafe = int32(tbb32:err) { exit 1; };
+func:main = int32() {
+    int64:h = ahash(1024i64);
+    string:s = raw ahget(h, "0");
+    exit 0;
+};

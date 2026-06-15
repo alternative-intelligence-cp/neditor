@@ -1,0 +1,17 @@
+struct:Cursor = { int32:row; int32:col; };
+struct:TextBuffer = { int64:lines_h; int32:count; Cursor:cursor; };
+
+func:failsafe = int32(tbb32:err) { exit 1; };
+
+func:buffer_get_line = string(TextBuffer:buf, int32:index) {
+    if (index < 0i32) { pass(""); }
+    if (index >= buf.count) { pass(""); }
+    pass("dummy");
+};
+
+func:main = int32() {
+    TextBuffer:buf;
+    buf.count = 10i32;
+    string:line = buffer_get_line(buf, 0i32);
+    exit 0;
+};

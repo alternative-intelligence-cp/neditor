@@ -1,0 +1,11 @@
+struct:Foo = { int32:x; };
+extern "libc" { func:printf = int32(string:fmt, int32:v); }
+func:failsafe = int32(tbb32:err) { exit 1; };
+func:make_foo = Foo() { Foo:f; f.x = 42i32; pass(f); };
+func:main = int32() {
+    Foo:f;
+    f.x = 0i32;
+    f = make_foo() ? f;
+    int32:res = printf("%d\n", f.x);
+    exit 0;
+};

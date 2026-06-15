@@ -1,0 +1,53 @@
+use "buffer.npk".*;
+use "sys.npk".*;
+use "stdlib/string.npk".*;
+
+pub struct:Viewport = {
+    int32:scroll_x;
+    int32:scroll_y;
+    int32:width;
+    int32:height;
+};
+
+pub func:viewport_init = Viewport(int32:w, int32:h) {
+    Viewport:vp;
+    vp.scroll_x = 0i32;
+    vp.scroll_y = 0i32;
+    vp.width = w;
+    vp.height = h;
+    pass(vp);
+};
+
+pub func:render_buffer = int32(TextBuffer:buf, Viewport:vp) {
+    int32:y = 0i32;
+    while (y < vp.height) {
+        int32:line_idx = vp.scroll_y + y;
+        int32:m = (sys_move(0i32, y) ? -1i32);
+        int32:c = (sys_clear_eol() ? -1i32);
+        
+        if (line_idx < buf.count) {
+            string:line = (buffer_get_line(buf, line_idx) ? "");
+            int64:len = string_length(line);
+            int32:len32 = @cast<int32>(len);
+            
+            if (vp.scroll_x < len32) {
+                int32:rem = len32 - vp.scroll_x;
+                int32:print_len = rem;
+                if (print_len > vp.width) {
+                    print_len = vp.width;
+                }
+                
+                string:disp = string_substring(line, @cast<int64>(vp.scroll_x), @cast<int64>(print_len));
+                print(disp);
+            }
+        } else {
+            if (line_idx == buf.count) {
+                if (buf.count == 0i32) {
+                    // Empty buffer, just leave blank or show ~
+                }
+            }
+        }
+        y = y + 1i32;
+    }
+    pass(0i32);
+};

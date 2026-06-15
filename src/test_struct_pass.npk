@@ -1,0 +1,13 @@
+struct:Simple = { int32:val; };
+
+func:failsafe = int32(tbb32:err) { exit 1; };
+
+func:my_func = string(Simple:s) {
+    pass("hello");
+};
+
+func:main = int32() {
+    Simple:s;
+    string:r = my_func(s);
+    exit 0;
+};

@@ -1,20 +1,65 @@
+use "stdlib/string.npk".*;
+
 pub struct:Cursor = {
     int32:row;
     int32:col;
 };
 
 pub struct:TextBuffer = {
-    string[1024]:lines;
+    int64:lines_h;
     int32:count;
     Cursor:cursor;
 };
 
 pub func:buffer_init = TextBuffer() {
     TextBuffer:buf;
+    buf.lines_h = ahash(1024i64);
     buf.count = 1i32;
-    buf.lines[0] = "";
+    int32:dummy = ahset(buf.lines_h, "0", "");
     buf.cursor.row = 0i32;
     buf.cursor.col = 0i32;
+    pass(buf);
+};
+
+pub func:buffer_get_line = string(TextBuffer:buf, int32:index) {
+    if (index < 0i32) { pass(""); }
+    if (index >= buf.count) { pass(""); }
+    string:res = ahget(buf.lines_h, string_from_int(@cast<int64>(index)));
+    pass(res);
+};
+
+pub func:buffer_set_line = TextBuffer(TextBuffer:buf, int32:index, string:text) {
+    if (index >= 0i32) {
+        if (index < buf.count) {
+            int32:dummy = ahset(buf.lines_h, string_from_int(@cast<int64>(index)), text);
+        }
+    }
+    pass(buf);
+};
+
+pub func:buffer_insert_line = TextBuffer(TextBuffer:buf, int32:index, string:text) {
+    if (index < 0i32) { pass(buf); }
+    int32:i = buf.count;
+    while (i > index) {
+        string:prev = (buffer_get_line(buf, i - 1i32) ? "");
+        int32:dummy = ahset(buf.lines_h, string_from_int(@cast<int64>(i)), prev);
+        i = i - 1i32;
+    }
+    int32:dummy2 = ahset(buf.lines_h, string_from_int(@cast<int64>(index)), text);
+    buf.count = buf.count + 1i32;
+    pass(buf);
+};
+
+pub func:buffer_delete_line = TextBuffer(TextBuffer:buf, int32:index) {
+    if (index < 0i32) { pass(buf); }
+    if (index >= buf.count) { pass(buf); }
+    int32:i = index;
+    while (i < buf.count - 1i32) {
+        string:next = (buffer_get_line(buf, i + 1i32) ? "");
+        int32:dummy = ahset(buf.lines_h, string_from_int(@cast<int64>(i)), next);
+        i = i + 1i32;
+    }
+    buf.count = buf.count - 1i32;
     pass(buf);
 };
 
@@ -26,8 +71,10 @@ pub func:buffer_clamp_cursor = TextBuffer(TextBuffer:buf) {
         buf.cursor.row = buf.count - 1i32;
     }
     
-    int64:len = string_length(buf.lines[buf.cursor.row]);
+    string:line = (buffer_get_line(buf, buf.cursor.row) ? "");
+    int64:len = string_length(line);
     int32:len32 = @cast<int32>(len);
+    
     if (buf.cursor.col < 0i32) {
         buf.cursor.col = 0i32;
     }
@@ -37,103 +84,42 @@ pub func:buffer_clamp_cursor = TextBuffer(TextBuffer:buf) {
     pass(buf);
 };
 
-pub func:buffer_insert_line = TextBuffer(TextBuffer:buf, int32:index, string:text) {
-    if (index < 0i32) { pass(buf); }
-    if (index > buf.count) { index = buf.count; }
-    if (buf.count >= 1024i32) { pass(buf); }
-    
-    int32:i = buf.count;
-    while (i > index) {
-        buf.lines[i] = buf.lines[i - 1i32];
-        i = i - 1i32;
-    }
-    buf.lines[index] = text;
-    buf.count = buf.count + 1i32;
-    
-    // adjust cursor if inserted before it
-    if (buf.cursor.row >= index) {
-        buf.cursor.row = buf.cursor.row + 1i32;
-    }
-    pass(buf);
-};
-
-pub func:buffer_delete_line = TextBuffer(TextBuffer:buf, int32:index) {
-    if (index < 0i32) { pass(buf); }
-    if (index >= buf.count) { pass(buf); }
-    
-    int32:i = index;
-    while (i < buf.count - 1i32) {
-        buf.lines[i] = buf.lines[i + 1i32];
-        i = i + 1i32;
-    }
-    buf.count = buf.count - 1i32;
-    if (buf.count == 0i32) {
-        buf.count = 1i32;
-        buf.lines[0] = "";
-    }
-    
-    // adjust cursor
-    if (buf.cursor.row > index) {
-        buf.cursor.row = buf.cursor.row - 1i32;
-    } else {
-        if (buf.cursor.row == index) {
-            buf.cursor.col = 0i32;
-            buf = raw buffer_clamp_cursor(buf);
-        }
-    }
-    pass(buf);
-};
-
-pub func:buffer_get_line = string(TextBuffer:buf, int32:index) {
-    if (index < 0i32) { pass(""); }
-    if (index >= buf.count) { pass(""); }
-    pass(buf.lines[index]);
-};
-
-pub func:buffer_set_line = TextBuffer(TextBuffer:buf, int32:index, string:text) {
-    if (index >= 0i32) {
-        if (index < buf.count) {
-            buf.lines[index] = text;
-        }
-    }
-    pass(buf);
-};
-
-pub func:buffer_insert_char_at_cursor = TextBuffer(TextBuffer:buf, string:char) {
-    buf = raw buffer_clamp_cursor(buf);
+pub func:buffer_insert_char_at_cursor = TextBuffer(TextBuffer:buf, string:c) {
+    buf = (buffer_clamp_cursor(buf) ? buf);
     int32:r = buf.cursor.row;
-    int32:c = buf.cursor.col;
-    string:line = buf.lines[r];
-    
+    int32:col = buf.cursor.col;
+    string:line = (buffer_get_line(buf, r) ? "");
     int64:len = string_length(line);
-    string:left = string_substring(line, 0i64, @cast<int64>(c));
-    string:right = string_substring(line, @cast<int64>(c), len);
     
-    buf.lines[r] = string_concat(left, string_concat(char, right));
-    buf.cursor.col = c + @cast<int32>(string_length(char));
+    string:left = string_substring(line, 0i64, @cast<int64>(col));
+    string:right = string_substring(line, @cast<int64>(col), len);
+    string:new_line = string_concat(left, string_concat(c, right));
+    
+    buf = (buffer_set_line(buf, r, new_line) ? buf);
+    buf.cursor.col = col + 1i32;
     pass(buf);
 };
 
 pub func:buffer_delete_char_at_cursor = TextBuffer(TextBuffer:buf) {
-    buf = raw buffer_clamp_cursor(buf);
+    buf = (buffer_clamp_cursor(buf) ? buf);
     int32:r = buf.cursor.row;
     int32:c = buf.cursor.col;
     
     if (c > 0i32) {
-        string:line = buf.lines[r];
+        string:line = (buffer_get_line(buf, r) ? "");
         int64:len = string_length(line);
         string:left = string_substring(line, 0i64, @cast<int64>(c - 1i32));
         string:right = string_substring(line, @cast<int64>(c), len);
-        buf.lines[r] = string_concat(left, right);
+        buf = (buffer_set_line(buf, r, string_concat(left, right)) ? buf);
         buf.cursor.col = c - 1i32;
     } else {
         if (r > 0i32) {
-            string:curr = buf.lines[r];
-            string:prev = buf.lines[r - 1i32];
+            string:curr = (buffer_get_line(buf, r) ? "");
+            string:prev = (buffer_get_line(buf, r - 1i32) ? "");
             int64:prev_len = string_length(prev);
             
-            buf.lines[r - 1i32] = string_concat(prev, curr);
-            buf = raw buffer_delete_line(buf, r);
+            buf = (buffer_set_line(buf, r - 1i32, string_concat(prev, curr)) ? buf);
+            buf = (buffer_delete_line(buf, r) ? buf);
             buf.cursor.row = r - 1i32;
             buf.cursor.col = @cast<int32>(prev_len);
         }
@@ -142,17 +128,17 @@ pub func:buffer_delete_char_at_cursor = TextBuffer(TextBuffer:buf) {
 };
 
 pub func:buffer_newline_at_cursor = TextBuffer(TextBuffer:buf) {
-    buf = raw buffer_clamp_cursor(buf);
+    buf = (buffer_clamp_cursor(buf) ? buf);
     int32:r = buf.cursor.row;
     int32:c = buf.cursor.col;
-    string:line = buf.lines[r];
+    string:line = (buffer_get_line(buf, r) ? "");
     int64:len = string_length(line);
     
     string:left = string_substring(line, 0i64, @cast<int64>(c));
     string:right = string_substring(line, @cast<int64>(c), len);
     
-    buf.lines[r] = left;
-    buf = raw buffer_insert_line(buf, r + 1i32, right);
+    buf = (buffer_set_line(buf, r, left) ? buf);
+    buf = (buffer_insert_line(buf, r + 1i32, right) ? buf);
     
     buf.cursor.row = r + 1i32;
     buf.cursor.col = 0i32;

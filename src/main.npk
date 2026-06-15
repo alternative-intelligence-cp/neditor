@@ -1,12 +1,77 @@
-int64:STDOUT = 1i64;
+func:failsafe = int32(tbb32:err) { exit 1; };
 
-func:print_line = NIL(string:msg) {
-    int64:len = string_length(msg);
-    drop(sys(WRITE, STDOUT, msg, len));
-    pass(NIL);
-};
+use "core/buffer.npk".*;
+use "core/file_io.npk".*;
+use "core/sys.npk".*;
+use "core/render.npk".*;
+use "stdlib/string.npk".*;
 
 func:main = int32() {
-    drop(print_line("Welcome to Neditor v0.0.0!\n"));
-    exit 0i32;
+    int32:init_res = (sys_enter_raw() ? -1i32);
+    int32:alt_res = (sys_alt_screen(1i32) ? -1i32);
+    int32:clear_res = (sys_clear() ? -1i32);
+    int32:hide_res = (sys_hide_cursor() ? -1i32);
+    
+    TextBuffer:buf;
+    buf = (buffer_init() ? buf);
+    buf = (buffer_set_line(buf, 0i32, "Welcome to Neditor v0.1.1!") ? buf);
+    buf = (buffer_insert_line(buf, 1i32, "This is the second line.") ? buf);
+    buf = (buffer_insert_line(buf, 2i32, "This is the third line.") ? buf);
+    buf = (buffer_insert_line(buf, 3i32, "A very long line that might exceed the terminal width to test wrapping and truncation of the viewport.") ? buf);
+    
+    int64:size = (sys_get_size() ? 0i64);
+    int32:term_w = @cast<int32>(size >> 32i64);
+    int32:term_h = @cast<int32>(size & 0xFFFFFFFFi64);
+    
+    Viewport:vp;
+    vp = (viewport_init(term_w, term_h) ? vp);
+    
+    int32:running = 1i32;
+    while (running == 1i32) {
+        size = (sys_get_size() ? 0i64);
+        vp.width = @cast<int32>(size >> 32i64);
+        vp.height = @cast<int32>(size & 0xFFFFFFFFi64);
+        
+        int32:r = (render_buffer(buf, vp) ? -1i32);
+        int32:f_res = (sys_flush() ? -1i32);
+        
+        int32:vk = (sys_read_key() ? 0i32);
+        if (vk > 0i32) {
+            // 'q' is 113, 'Ctrl+X' is 24
+            if (vk == 113i32) {
+                running = 0i32;
+            }
+            if (vk == 24i32) {
+                running = 0i32;
+            }
+            // 'j' is 106
+            if (vk == 106i32) {
+                vp.scroll_y = vp.scroll_y + 1i32;
+            }
+            // 'k' is 107
+            if (vk == 107i32) {
+                vp.scroll_y = vp.scroll_y - 1i32;
+                if (vp.scroll_y < 0i32) {
+                    vp.scroll_y = 0i32;
+                }
+            }
+            // 'h' is 104
+            if (vk == 104i32) {
+                vp.scroll_x = vp.scroll_x - 1i32;
+                if (vp.scroll_x < 0i32) {
+                    vp.scroll_x = 0i32;
+                }
+            }
+            // 'l' is 108
+            if (vk == 108i32) {
+                vp.scroll_x = vp.scroll_x + 1i32;
+            }
+        }
+    }
+    
+    int32:show_res = (sys_show_cursor() ? -1i32);
+    int32:alt_res_off = (sys_alt_screen(0i32) ? -1i32);
+    int32:exit_raw = (sys_exit_raw() ? -1i32);
+    
+    exit 0;
 };

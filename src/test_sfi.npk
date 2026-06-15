@@ -1,0 +1,5 @@
+use "stdlib/string.npk".*;
+func:main = int32() {
+    string:s = (string_from_int(42i64) ? "");
+    exit 0;
+};

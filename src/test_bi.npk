@@ -1,0 +1,14 @@
+struct:Cursor = { int32:row; int32:col; };
+struct:TextBuffer = { int64:lines_h; int32:count; Cursor:cursor; };
+
+func:failsafe = int32(tbb32:err) { exit 1; };
+
+func:buffer_init = TextBuffer() {
+    TextBuffer:buf;
+    pass(buf);
+};
+
+func:main = int32() {
+    TextBuffer:buf = buffer_init();
+    exit 0;
+};

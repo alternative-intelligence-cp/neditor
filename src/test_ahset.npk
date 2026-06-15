@@ -1,0 +1,10 @@
+func:test_ahset = int32() {
+    int64:h = ahash(1024i64);
+    int32:res = (ahset(h, "0", "hello") ? -1i32);
+    pass(res);
+};
+
+func:main = int32() {
+    int32:r = test_ahset();
+    exit r;
+};

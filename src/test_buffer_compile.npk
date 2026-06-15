@@ -1,0 +1,8 @@
+func:failsafe = int32(tbb32:err) { exit 1; };
+
+use "core/buffer.npk".*;
+
+func:main = int32() {
+    TextBuffer:buf = buffer_init();
+    exit 0;
+};

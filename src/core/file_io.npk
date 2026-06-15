@@ -3,21 +3,22 @@ use "/home/randy/Workspace/REPOS/nitpick-packages/packages/nitpick-fs/src/nitpic
 use "stdlib/string.npk".*;
 
 pub func:buffer_load_from_file = TextBuffer(string:path) {
-    TextBuffer:buf = raw buffer_init();
+    TextBuffer:buf;
+    buf = (buffer_init() ? buf);
     
-    int32:exists = raw fs_exists(path);
+    int32:exists = (fs_exists(path) ? 0i32);
     if (exists == 0i32) {
         pass(buf);
     }
     
-    string:content = raw fs_read_file(path);
-    string:err = raw fs_error();
+    string:content = (fs_read_file(path) ? "");
+    string:err = (fs_error() ? "");
     if (string_equals(err, "") == false) {
         pass(buf);
     }
     
-    int64:sp = raw str_split(content, "\n");
-    int64:count = raw str_split_count(sp);
+    int64:sp = (str_split(content, "\n") ? 0i64);
+    int64:count = (str_split_count(sp) ? 0i64);
     
     if (count > 0i64) {
         buf.count = @cast<int32>(count);
@@ -27,7 +28,8 @@ pub func:buffer_load_from_file = TextBuffer(string:path) {
         
         int32:i = 0i32;
         while (i < buf.count) {
-            buf.lines[i] = raw str_split_get(sp, @cast<int64>(i));
+            string:line = (str_split_get(sp, @cast<int64>(i)) ? "");
+            buf = (buffer_set_line(buf, i, line) ? buf);
             i = i + 1i32;
         }
     }
@@ -43,10 +45,11 @@ pub func:buffer_save_to_file = int32(TextBuffer:buf, string:path) {
         if (i > 0i32) {
             content = string_concat(content, "\n");
         }
-        content = string_concat(content, buf.lines[i]);
+        string:line = (buffer_get_line(buf, i) ? "");
+        content = string_concat(content, line);
         i = i + 1i32;
     }
     
-    int32:res = raw fs_write_file(path, content);
+    int32:res = (fs_write_file(path, content) ? -1i32);
     pass(res);
 };

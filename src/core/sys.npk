@@ -1,0 +1,30 @@
+use "stdlib/string.npk".*;
+
+extern "libc" {
+    func:nitpick_display_enter_raw = int32();
+    func:nitpick_display_exit_raw = int32();
+    func:nitpick_display_alt_screen = int32(int32:on);
+    func:nitpick_display_hide_cursor = int32();
+    func:nitpick_display_show_cursor = int32();
+    func:nitpick_display_clear = int32();
+    func:nitpick_display_flush = int32();
+    func:nitpick_input_read_key = int32();
+    func:nitpick_display_get_size = int64();
+    func:nitpick_display_move = int32(int32:col, int32:row);
+    func:nitpick_display_clear_eol = int32();
+    func:read = int32(int32:fd, int64:buf, int64:count);
+    func:write = int32(int32:fd, int64:buf, int64:count);
+}
+
+pub func:sys_enter_raw = int32() { pass(nitpick_display_enter_raw()); };
+pub func:sys_exit_raw = int32() { pass(nitpick_display_exit_raw()); };
+pub func:sys_alt_screen = int32(int32:on) { pass(nitpick_display_alt_screen(on)); };
+pub func:sys_hide_cursor = int32() { pass(nitpick_display_hide_cursor()); };
+pub func:sys_show_cursor = int32() { pass(nitpick_display_show_cursor()); };
+pub func:sys_clear = int32() { pass(nitpick_display_clear()); };
+pub func:sys_flush = int32() { pass(nitpick_display_flush()); };
+pub func:sys_read_key = int32() { pass(nitpick_input_read_key()); };
+pub func:sys_get_size = int64() { pass(nitpick_display_get_size()); };
+pub func:sys_move = int32(int32:col, int32:row) { pass(nitpick_display_move(col, row)); };
+pub func:sys_clear_eol = int32() { pass(nitpick_display_clear_eol()); };
+
