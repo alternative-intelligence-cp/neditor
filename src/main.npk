@@ -32,13 +32,13 @@ func:main = int32() {
         vp.width = @cast<int32>(size >> 32i64);
         vp.height = @cast<int32>(size & 0xFFFFFFFFi64);
         
-        int32:r = (render_buffer(buf, vp) ? -1i32);
         // AUTO SCROLL
         if (buf.cursor.row < vp.scroll_y) { vp.scroll_y = buf.cursor.row; }
         if (buf.cursor.row >= vp.scroll_y + vp.height) { vp.scroll_y = buf.cursor.row - vp.height + 1i32; }
         if (buf.cursor.col < vp.scroll_x) { vp.scroll_x = buf.cursor.col; }
         if (buf.cursor.col >= vp.scroll_x + vp.width) { vp.scroll_x = buf.cursor.col - vp.width + 1i32; }
         
+        int32:r = (render_buffer(buf, vp) ? -1i32);
         int32:rc = (render_cursor(buf, vp) ? -1i32);
         int32:f_res = (sys_flush() ? -1i32);
         
