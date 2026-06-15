@@ -1,0 +1,12 @@
+int64:STDOUT = 1i64;
+
+func:print_line = NIL(string:msg) {
+    int64:len = string_length(msg);
+    drop(sys(WRITE, STDOUT, msg, len));
+    pass(NIL);
+};
+
+func:main = int32() {
+    drop(print_line("Welcome to Neditor v0.0.0!\n"));
+    exit 0i32;
+};
