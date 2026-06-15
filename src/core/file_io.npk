@@ -1,0 +1,52 @@
+use "buffer.npk".*;
+use "/home/randy/Workspace/REPOS/nitpick-packages/packages/nitpick-fs/src/nitpick_fs.npk".*;
+use "stdlib/string.npk".*;
+
+pub func:buffer_load_from_file = TextBuffer(string:path) {
+    TextBuffer:buf = raw buffer_init();
+    
+    int32:exists = raw fs_exists(path);
+    if (exists == 0i32) {
+        pass(buf);
+    }
+    
+    string:content = raw fs_read_file(path);
+    string:err = raw fs_error();
+    if (string_equals(err, "") == false) {
+        pass(buf);
+    }
+    
+    int64:sp = raw str_split(content, "\n");
+    int64:count = raw str_split_count(sp);
+    
+    if (count > 0i64) {
+        buf.count = @cast<int32>(count);
+        if (buf.count > 1024i32) {
+            buf.count = 1024i32;
+        }
+        
+        int32:i = 0i32;
+        while (i < buf.count) {
+            buf.lines[i] = raw str_split_get(sp, @cast<int64>(i));
+            i = i + 1i32;
+        }
+    }
+    drop str_split_free(sp);
+    
+    pass(buf);
+};
+
+pub func:buffer_save_to_file = int32(TextBuffer:buf, string:path) {
+    string:content = "";
+    int32:i = 0i32;
+    while (i < buf.count) {
+        if (i > 0i32) {
+            content = string_concat(content, "\n");
+        }
+        content = string_concat(content, buf.lines[i]);
+        i = i + 1i32;
+    }
+    
+    int32:res = raw fs_write_file(path, content);
+    pass(res);
+};

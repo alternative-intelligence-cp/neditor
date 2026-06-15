@@ -41,3 +41,11 @@ flags = [
 ]
 link_libraries = []
 link_paths = []
+
+[target.test-file-io]
+type = "binary"
+sources = ["tests/test_file_io.npk"]
+deps = []
+flags = []
+link_libraries = ["nitpick_fs_shim", "nitpick_libc_string", "nitpick_libc_mem"]
+link_paths = ["/home/randy/Workspace/REPOS/nitpick-packages/packages/nitpick-fs", "/home/randy/Workspace/REPOS/nitpick-libc/shim"]

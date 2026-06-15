@@ -1,0 +1,26 @@
+use "../src/core/buffer.npk".*;
+use "../src/core/file_io.npk".*;
+use "/home/randy/Workspace/REPOS/nitpick-packages/packages/nitpick-fs/src/nitpick_fs.npk".*;
+
+func:main = int32() {
+    TextBuffer:buf = raw buffer_init();
+    
+    buf = raw buffer_set_line(buf, 0i32, "line 1");
+    buf = raw buffer_insert_line(buf, 1i32, "line 2");
+    buf = raw buffer_insert_line(buf, 2i32, "line 3");
+    
+    string:tmp_file = "test_io_temp.txt";
+    int32:res = raw buffer_save_to_file(buf, tmp_file);
+    if (res != 1i32) { exit 1i32; }
+    
+    TextBuffer:buf2 = raw buffer_load_from_file(tmp_file);
+    if (buf2.count != 3i32) { exit 2i32; }
+    if (raw buffer_get_line(buf2, 0i32) != "line 1") { exit 3i32; }
+    if (raw buffer_get_line(buf2, 1i32) != "line 2") { exit 4i32; }
+    if (raw buffer_get_line(buf2, 2i32) != "line 3") { exit 5i32; }
+    
+    int32:rm = raw fs_remove(tmp_file);
+    if (rm != 1i32) { exit 6i32; }
+    
+    exit 0i32;
+};
