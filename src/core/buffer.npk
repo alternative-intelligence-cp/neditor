@@ -16,8 +16,10 @@ pub func:buffer_init = TextBuffer() {
     buf.lines_h = ahash(1024i64);
     buf.count = 1i32;
     int32:dummy = ahset(buf.lines_h, "0", "");
-    buf.cursor.row = 0i32;
-    buf.cursor.col = 0i32;
+    Cursor:c;
+    c.row = 0i32;
+    c.col = 0i32;
+    buf.cursor = c;
     pass(buf);
 };
 

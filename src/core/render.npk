@@ -51,3 +51,20 @@ pub func:render_buffer = int32(TextBuffer:buf, Viewport:vp) {
     }
     pass(0i32);
 };
+
+pub func:render_cursor = int32(TextBuffer:buf, Viewport:vp) {
+    int32:cx = buf.cursor.col - vp.scroll_x;
+    int32:cy = buf.cursor.row - vp.scroll_y;
+    
+    if (cx >= 0i32) {
+        if (cx < vp.width) {
+            if (cy >= 0i32) {
+                if (cy < vp.height) {
+                    int32:m = (sys_move(cx, cy) ? -1i32);
+                }
+            }
+        }
+    }
+    int32:s = (sys_show_cursor() ? -1i32);
+    pass(0i32);
+};

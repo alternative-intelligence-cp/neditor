@@ -33,6 +33,13 @@ func:main = int32() {
         vp.height = @cast<int32>(size & 0xFFFFFFFFi64);
         
         int32:r = (render_buffer(buf, vp) ? -1i32);
+        // AUTO SCROLL
+        if (buf.cursor.row < vp.scroll_y) { vp.scroll_y = buf.cursor.row; }
+        if (buf.cursor.row >= vp.scroll_y + vp.height) { vp.scroll_y = buf.cursor.row - vp.height + 1i32; }
+        if (buf.cursor.col < vp.scroll_x) { vp.scroll_x = buf.cursor.col; }
+        if (buf.cursor.col >= vp.scroll_x + vp.width) { vp.scroll_x = buf.cursor.col - vp.width + 1i32; }
+        
+        int32:rc = (render_cursor(buf, vp) ? -1i32);
         int32:f_res = (sys_flush() ? -1i32);
         
         int32:vk = (sys_read_key() ? 0i32);
@@ -44,28 +51,51 @@ func:main = int32() {
             if (vk == 24i32) {
                 running = 0i32;
             }
-            // 'j' is 106
-            if (vk == 106i32) {
-                vp.scroll_y = vp.scroll_y + 1i32;
+            // UP
+            if (vk == 200i32) {
+                buf.cursor.row = buf.cursor.row - 1i32;
+                if (buf.cursor.row < 0i32) { buf.cursor.row = 0i32; }
             }
-            // 'k' is 107
-            if (vk == 107i32) {
-                vp.scroll_y = vp.scroll_y - 1i32;
-                if (vp.scroll_y < 0i32) {
-                    vp.scroll_y = 0i32;
-                }
+            // DOWN
+            if (vk == 201i32) {
+                buf.cursor.row = buf.cursor.row + 1i32;
+                if (buf.cursor.row >= buf.count) { buf.cursor.row = buf.count - 1i32; }
+                if (buf.cursor.row < 0i32) { buf.cursor.row = 0i32; }
             }
-            // 'h' is 104
-            if (vk == 104i32) {
-                vp.scroll_x = vp.scroll_x - 1i32;
-                if (vp.scroll_x < 0i32) {
-                    vp.scroll_x = 0i32;
-                }
+            // LEFT
+            if (vk == 202i32) {
+                buf.cursor.col = buf.cursor.col - 1i32;
+                if (buf.cursor.col < 0i32) { buf.cursor.col = 0i32; }
             }
-            // 'l' is 108
-            if (vk == 108i32) {
-                vp.scroll_x = vp.scroll_x + 1i32;
+            // RIGHT
+            if (vk == 203i32) {
+                buf.cursor.col = buf.cursor.col + 1i32;
             }
+            // Home (Ctrl+A / 1)
+            if (vk == 1i32) {
+                buf.cursor.col = 0i32;
+            }
+            // End (Ctrl+E / 5)
+            if (vk == 5i32) {
+                string:line = (buffer_get_line(buf, buf.cursor.row) ? "");
+                buf.cursor.col = @cast<int32>(string_length(line));
+            }
+            // PageUp (Ctrl+B / 2)
+            if (vk == 2i32) {
+                buf.cursor.row = buf.cursor.row - vp.height;
+                if (buf.cursor.row < 0i32) { buf.cursor.row = 0i32; }
+            }
+            // PageDown (Ctrl+F / 6)
+            if (vk == 6i32) {
+                buf.cursor.row = buf.cursor.row + vp.height;
+                if (buf.cursor.row >= buf.count) { buf.cursor.row = buf.count - 1i32; }
+                if (buf.cursor.row < 0i32) { buf.cursor.row = 0i32; }
+            }
+            
+            // Adjust col when moving up/down or right
+            string:cur_line = (buffer_get_line(buf, buf.cursor.row) ? "");
+            int32:cur_len = @cast<int32>(string_length(cur_line));
+            if (buf.cursor.col > cur_len) { buf.cursor.col = cur_len; }
         }
     }
     
