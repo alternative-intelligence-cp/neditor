@@ -14,7 +14,7 @@ pub struct:TextBuffer = {
 
 pub func:buffer_init = TextBuffer() {
     TextBuffer:buf;
-    buf.lines_h = ahash(1024i64);
+    buf.lines_h = ahash(0i64);
     buf.count = 1i32;
     int32:dummy = ahset(buf.lines_h, "0", "");
     Cursor:c;

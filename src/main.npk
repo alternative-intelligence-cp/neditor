@@ -17,7 +17,7 @@ func:main = int32() {
     
     TextBuffer:buf;
     buf = (buffer_init() ? buf);
-    buf = (buffer_set_line(buf, 0i32, "Welcome to Neditor v0.1.1!") ? buf);
+    buf = (buffer_set_line(buf, 0i32, "Welcome to Neditor v0.2.x!") ? buf);
     buf = (buffer_insert_line(buf, 1i32, "This is the second line.") ? buf);
     buf = (buffer_insert_line(buf, 2i32, "This is the third line.") ? buf);
     buf = (buffer_insert_line(buf, 3i32, "A very long line that might exceed the terminal width to test wrapping and truncation of the viewport.") ? buf);

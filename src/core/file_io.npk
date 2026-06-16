@@ -22,9 +22,6 @@ pub func:buffer_load_from_file = TextBuffer(string:path) {
     
     if (count > 0i64) {
         buf.count = @cast<int32>(count);
-        if (buf.count > 1024i32) {
-            buf.count = 1024i32;
-        }
         
         int32:i = 0i32;
         while (i < buf.count) {

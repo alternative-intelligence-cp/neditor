@@ -5,9 +5,7 @@ sdk: org.freedesktop.Sdk
 command: neditor
 finish-args:
   - --share=ipc
-  - --socket=fallback-x11
-  - --socket=wayland
-  - --device=dri
+  - --filesystem=home
 modules:
   - name: neditor
     buildsystem: simple
