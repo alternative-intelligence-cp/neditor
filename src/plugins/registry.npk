@@ -1,13 +1,16 @@
 use "../core/plugin.npk".*;
 use "hello_plugin.npk".*;
+use "wordcount.npk".*;
 
 pub func:registry_on_load = EditorContext(EditorContext:ctx) {
     ctx = (hello_plugin_on_load(ctx) ? ctx);
+    ctx = (wordcount_plugin_on_load(ctx) ? ctx);
     pass ctx;
 };
 
 pub func:registry_on_unload = EditorContext(EditorContext:ctx) {
     ctx = (hello_plugin_on_unload(ctx) ? ctx);
+    ctx = (wordcount_plugin_on_unload(ctx) ? ctx);
     pass ctx;
 };
 
@@ -15,19 +18,20 @@ pub func:registry_on_key_press = EditorContext(EditorContext:ctx, int32:vk) {
     ctx = (hello_plugin_on_key_press(ctx, vk) ? ctx);
     if (ctx.consume_key == 1i32) { pass ctx; }
     
-    // Additional plugins can be called here:
-    // ctx = (plugin2_on_key_press(ctx, vk) ? ctx);
-    // if (ctx.consume_key == 1i32) { pass ctx; }
+    ctx = (wordcount_plugin_on_key_press(ctx, vk) ? ctx);
+    if (ctx.consume_key == 1i32) { pass ctx; }
     
     pass ctx;
 };
 
 pub func:registry_on_save = EditorContext(EditorContext:ctx) {
     ctx = (hello_plugin_on_save(ctx) ? ctx);
+    ctx = (wordcount_plugin_on_save(ctx) ? ctx);
     pass ctx;
 };
 
 pub func:registry_on_load_file = EditorContext(EditorContext:ctx) {
     ctx = (hello_plugin_on_load_file(ctx) ? ctx);
+    ctx = (wordcount_plugin_on_load_file(ctx) ? ctx);
     pass ctx;
 };

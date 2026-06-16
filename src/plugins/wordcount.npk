@@ -1,0 +1,70 @@
+use "../core/plugin.npk".*;
+use "../core/sys.npk".*;
+use "../stdlib/string.npk".*;
+use "../stdlib/fmt.npk".*;
+
+pub func:wordcount_plugin_on_load = EditorContext(EditorContext:ctx) {
+    pass ctx;
+};
+
+pub func:wordcount_plugin_on_unload = EditorContext(EditorContext:ctx) {
+    pass ctx;
+};
+
+pub func:wordcount_plugin_on_key_press = EditorContext(EditorContext:ctx, int32:vk) {
+    // Ctrl+N is 14
+    if (vk == 14i32) {
+        // Count words
+        int64:words = 0i64;
+        int32:i = 0i32;
+        while (i < ctx.buf.count) {
+            string:line = (buffer_get_line(ctx.buf, i) ? "");
+            int64:sp = (str_split(line, " ") ? 0i64);
+            int64:count = (str_split_count(sp) ? 0i64);
+            // count empty strings?
+            // Actually, a simple approach is just count.
+            words = words + count;
+            drop str_split_free(sp);
+            i = i + 1i32;
+        }
+        
+        // Draw modal
+        int32:modal_w = 40i32;
+        int32:modal_h = 5i32;
+        int32:start_x = (ctx.vp.width - modal_w) / 2i32;
+        int32:start_y = (ctx.vp.height - modal_h) / 2i32;
+        
+        int32:running = 1i32;
+        while (running == 1i32) {
+            int32:m = (sys_move(start_x, start_y) ? -1i32);
+            print("\x1b[7m                                        \x1b[0m"); // 40 spaces
+            m = (sys_move(start_x, start_y + 1i32) ? -1i32);
+            print("\x1b[7m      Word Count: ");
+            print(fmt_int(words));
+            print("                \x1b[0m"); // hacky spacing
+            
+            m = (sys_move(start_x, start_y + 2i32) ? -1i32);
+            print("\x1b[7m                                        \x1b[0m");
+            m = (sys_move(start_x, start_y + 3i32) ? -1i32);
+            print("\x1b[7m      [Press any key to dismiss]        \x1b[0m");
+            m = (sys_move(start_x, start_y + 4i32) ? -1i32);
+            print("\x1b[7m                                        \x1b[0m");
+            
+            int32:f = (sys_flush() ? -1i32);
+            int32:mvk = (sys_read_key() ? 0i32);
+            if (mvk > 0i32) {
+                running = 0i32;
+            }
+        }
+        ctx.consume_key = 1i32;
+    }
+    pass ctx;
+};
+
+pub func:wordcount_plugin_on_save = EditorContext(EditorContext:ctx) {
+    pass ctx;
+};
+
+pub func:wordcount_plugin_on_load_file = EditorContext(EditorContext:ctx) {
+    pass ctx;
+};
