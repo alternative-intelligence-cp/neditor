@@ -1,6 +1,6 @@
 [project]
 name = "neditor"
-version = "0.0.0"
+version = "1.0.0"
 
 [target.neditor]
 type = "binary"
