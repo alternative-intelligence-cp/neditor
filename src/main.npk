@@ -5,7 +5,8 @@ use "core/file_io.npk".*;
 use "core/sys.npk".*;
 use "core/render.npk".*;
 use "stdlib/string.npk".*;
-
+use "core/plugin.npk".*;
+use "plugins/registry.npk".*;
 func:main = int32() {
     int32:init_res = (sys_enter_raw() ? -1i32);
     int32:alt_res = (sys_alt_screen(1i32) ? -1i32);
@@ -35,6 +36,15 @@ func:main = int32() {
     string:replace_with = "";
     int32:replace_all = 0i32;
     
+    EditorContext:ctx;
+    ctx.buf = buf;
+    ctx.vp = vp;
+    ctx.consume_key = 0i32;
+    ctx.exit_editor = 0i32;
+    ctx = raw registry_on_load(ctx);
+    buf = ctx.buf;
+    vp = ctx.vp;
+    
     int32:running = 1i32;
     while (running == 1i32) {
         size = (sys_get_size() ? 0i64);
@@ -56,6 +66,14 @@ func:main = int32() {
         
         int32:vk = (sys_read_key() ? 0i32);
         if (vk > 0i32) {
+            ctx.buf = buf;
+            ctx.vp = vp;
+            ctx.consume_key = 0i32;
+            ctx = raw registry_on_key_press(ctx, vk);
+            buf = ctx.buf;
+            vp = ctx.vp;
+            if (ctx.exit_editor != 0i32) { running = 0i32; }
+            else { if (ctx.consume_key == 0i32) {
             if (prompt_mode == 1i32) {
                 // Cancel: Ctrl+C (3) or Ctrl+G (7)
                 if ((vk == 3i32) || (vk == 7i32)) {
@@ -344,6 +362,7 @@ func:main = int32() {
             int32:cur_len = @cast<int32>(string_length(cur_line));
             if (buf.cursor.col > cur_len) { buf.cursor.col = cur_len; }
             }}}}} // end else normal mode
+            }} // end else not consumed
         }
     }
     

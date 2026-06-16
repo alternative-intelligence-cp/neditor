@@ -1,0 +1,23 @@
+use "../core/plugin.npk".*;
+use "hello_plugin.npk".*;
+
+pub func:registry_on_load = EditorContext(EditorContext:ctx) {
+    ctx = raw hello_plugin_on_load(ctx);
+    pass ctx;
+};
+
+pub func:registry_on_unload = EditorContext(EditorContext:ctx) {
+    ctx = raw hello_plugin_on_unload(ctx);
+    pass ctx;
+};
+
+pub func:registry_on_key_press = EditorContext(EditorContext:ctx, int32:vk) {
+    ctx = raw hello_plugin_on_key_press(ctx, vk);
+    if (ctx.consume_key == 1i32) { pass ctx; }
+    
+    // Additional plugins can be called here:
+    // ctx = raw plugin2_on_key_press(ctx, vk);
+    // if (ctx.consume_key == 1i32) { pass ctx; }
+    
+    pass ctx;
+};
