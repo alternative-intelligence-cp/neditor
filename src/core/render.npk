@@ -89,14 +89,25 @@ pub func:render_title_bar = int32(TextBuffer:buf, Viewport:vp) {
     pass(0i32);
 };
 
-pub func:render_hint_bar = int32(Viewport:vp) {
-    int32:m1 = (sys_move(0i32, vp.height - 2i32) ? -1i32);
-    int32:c1 = (sys_clear_eol() ? -1i32);
-    print("\x1b[7m^G\x1b[0m Get Help  \x1b[7m^O\x1b[0m Write Out");
-    
-    int32:m2 = (sys_move(0i32, vp.height - 1i32) ? -1i32);
-    int32:c2 = (sys_clear_eol() ? -1i32);
-    print("\x1b[7m^X\x1b[0m Exit");
-    
+pub func:render_hint_bar = int32(Viewport:vp, int32:prompt_mode, string:search_query) {
+    if (prompt_mode == 1i32) {
+        int32:m1 = (sys_move(0i32, vp.height - 2i32) ? -1i32);
+        int32:c1 = (sys_clear_eol() ? -1i32);
+        print("Search: ");
+        print(search_query);
+        print("_");
+        
+        int32:m2 = (sys_move(0i32, vp.height - 1i32) ? -1i32);
+        int32:c2 = (sys_clear_eol() ? -1i32);
+        print("\x1b[7m^G\x1b[0m Cancel  \x1b[7mEnter\x1b[0m Confirm");
+    } else {
+        int32:m1 = (sys_move(0i32, vp.height - 2i32) ? -1i32);
+        int32:c1 = (sys_clear_eol() ? -1i32);
+        print("\x1b[7m^G\x1b[0m Get Help  \x1b[7m^O\x1b[0m Write Out  \x1b[7m^K\x1b[0m Cut Text  \x1b[7m^W\x1b[0m Where Is");
+        
+        int32:m2 = (sys_move(0i32, vp.height - 1i32) ? -1i32);
+        int32:c2 = (sys_clear_eol() ? -1i32);
+        print("\x1b[7m^X\x1b[0m Exit      \x1b[7m^U\x1b[0m Paste Text");
+    }
     pass(0i32);
 };
