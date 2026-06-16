@@ -1,5 +1,6 @@
 use "buffer.npk".*;
 use "sys.npk".*;
+use "syntax.npk".*;
 use "stdlib/string.npk".*;
 
 pub struct:Viewport = {
@@ -40,8 +41,7 @@ pub func:render_buffer = int32(TextBuffer:buf, Viewport:vp) {
                     print_len = vp.width;
                 }
                 
-                string:disp = string_substring(line, @cast<int64>(vp.scroll_x), @cast<int64>(print_len));
-                print(disp);
+                int32:sr = (syntax_print_line(line, vp.scroll_x, print_len) ? 0i32);
             }
         } else {
             if (line_idx == buf.count) {

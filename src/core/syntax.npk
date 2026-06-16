@@ -1,0 +1,152 @@
+use "../stdlib/string.npk".*;
+
+func:byte_at = int32(string:s, int64:idx) {
+    int64:c = str_byte_at(s, idx) ? 0i64;
+    pass @cast<int32>(c);
+};
+
+func:is_alpha = bool(int32:c) {
+    if ((c >= 65i32) && (c <= 90i32)) { pass true; }
+    if ((c >= 97i32) && (c <= 122i32)) { pass true; }
+    pass false;
+};
+
+func:is_digit = bool(int32:c) {
+    if ((c >= 48i32) && (c <= 57i32)) { pass true; }
+    pass false;
+};
+
+func:is_keyword = bool(string:w) {
+    if (string_equals(w, "use")) { pass true; }
+    if (string_equals(w, "pub")) { pass true; }
+    if (string_equals(w, "struct")) { pass true; }
+    if (string_equals(w, "func")) { pass true; }
+    if (string_equals(w, "if")) { pass true; }
+    if (string_equals(w, "else")) { pass true; }
+    if (string_equals(w, "while")) { pass true; }
+    if (string_equals(w, "pass")) { pass true; }
+    if (string_equals(w, "exit")) { pass true; }
+    if (string_equals(w, "raw")) { pass true; }
+    if (string_equals(w, "drop")) { pass true; }
+    if (string_equals(w, "true")) { pass true; }
+    if (string_equals(w, "false")) { pass true; }
+    if (string_equals(w, "extern")) { pass true; }
+    pass false;
+};
+
+func:is_type = bool(string:w) {
+    if (string_equals(w, "int32")) { pass true; }
+    if (string_equals(w, "int64")) { pass true; }
+    if (string_equals(w, "flt64")) { pass true; }
+    if (string_equals(w, "bool")) { pass true; }
+    if (string_equals(w, "string")) { pass true; }
+    if (string_equals(w, "void")) { pass true; }
+    pass false;
+};
+
+pub func:syntax_print_line = int32(string:line, int32:scroll_x, int32:max_width) {
+    int64:len = string_length(line);
+    int64:i = 0i64;
+    int64:end_col = @cast<int64>(scroll_x + max_width);
+    int64:sx = @cast<int64>(scroll_x);
+    
+    while (i < len) {
+        if (i >= end_col) {
+            i = len; // break
+        } else {
+            int32:ch = byte_at(line, i) ? 0i32;
+            int64:end_idx = i;
+            string:color = "";
+            
+            bool:matched = false;
+            
+            if (matched == false) {
+                if (ch == 34i32) { // '"'
+                    matched = true;
+                    int32:in_str = 1i32;
+                    end_idx = i + 1i64;
+                    while ((end_idx < len) && (in_str == 1i32)) {
+                        int32:c2 = byte_at(line, end_idx) ? 0i32;
+                        if (c2 == 34i32) {
+                            int32:prev = byte_at(line, end_idx - 1i64) ? 0i32;
+                            if (prev != 92i32) {
+                                in_str = 0i32;
+                            }
+                        }
+                        end_idx = end_idx + 1i64;
+                    }
+                    color = "\x1b[33m"; // Yellow
+                }
+            }
+            
+            if (matched == false) {
+                if ((ch == 47i32) && (i + 1i64 < len)) {
+                    if ((byte_at(line, i + 1i64) ? 0i32) == 47i32) {
+                        matched = true;
+                        end_idx = len;
+                        color = "\x1b[90m"; // Bright Black / Gray
+                    }
+                }
+            }
+            
+            if (matched == false) {
+                if ((is_alpha(ch) ? false) || (ch == 95i32)) { // A-Z, a-z, _
+                    matched = true;
+                    end_idx = i + 1i64;
+                    int32:in_word = 1i32;
+                    while ((end_idx < len) && (in_word == 1i32)) {
+                        int32:c2 = byte_at(line, end_idx) ? 0i32;
+                        if ((is_alpha(c2) ? false) || (is_digit(c2) ? false) || (c2 == 95i32)) {
+                            end_idx = end_idx + 1i64;
+                        } else {
+                            in_word = 0i32;
+                        }
+                    }
+                    string:word = string_substring(line, i, end_idx);
+                    if (is_keyword(word) ? false) {
+                        color = "\x1b[35m"; // Magenta
+                    } else {
+                        if (is_type(word) ? false) {
+                            color = "\x1b[36m"; // Cyan
+                        }
+                    }
+                }
+            }
+            
+            if (matched == false) {
+                if (is_digit(ch) ? false) {
+                    matched = true;
+                    end_idx = i + 1i64;
+                    int32:in_num = 1i32;
+                    while ((end_idx < len) && (in_num == 1i32)) {
+                        int32:c2 = byte_at(line, end_idx) ? 0i32;
+                        if ((is_digit(c2) ? false) || (c2 == 46i32) || (c2 == 105i32)) {
+                            end_idx = end_idx + 1i64;
+                        } else {
+                            in_num = 0i32;
+                        }
+                    }
+                    color = "\x1b[32m"; // Green
+                }
+            }
+            
+            if (matched == false) {
+                end_idx = i + 1i64;
+            }
+            
+            int64:p_start = i;
+            if (p_start < sx) { p_start = sx; }
+            int64:p_end = end_idx;
+            if (p_end > end_col) { p_end = end_col; }
+            
+            if (p_start < p_end) {
+                if (string_equals(color, "") == false) { print(color); }
+                print(string_substring(line, p_start, p_end));
+                if (string_equals(color, "") == false) { print("\x1b[0m"); }
+            }
+            
+            i = end_idx;
+        }
+    }
+    pass 0i32;
+};
