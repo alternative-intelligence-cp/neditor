@@ -45,3 +45,14 @@ flags = [
 ]
 link_libraries = ["nitpick_display_shim", "nitpick_libc_mem", "nitpick_fs_shim", "nitpick_libc_string", "nitpick_input"]
 link_paths = ["/home/randy/Workspace/REPOS/nitpick-packages/packages/nitpick-display/shim", "/home/randy/Workspace/REPOS/nitpick-libc/shim", "/home/randy/Workspace/REPOS/nitpick-packages/packages/nitpick-fs/shim", "/home/randy/Workspace/REPOS/nitpick-packages/packages/nitpick-input/shim"]
+
+[target.test-plugin]
+type = "binary"
+sources = ["tests/test_plugin.npk"]
+deps = []
+flags = [
+    "-I", "src",
+    "-I", "/home/randy/Workspace/REPOS/nitpick-packages/packages/nitpick-fs/src"
+]
+link_libraries = ["nitpick_display_shim", "nitpick_libc_mem", "nitpick_fs_shim", "nitpick_libc_string", "nitpick_input"]
+link_paths = ["/home/randy/Workspace/REPOS/nitpick-packages/packages/nitpick-display/shim", "/home/randy/Workspace/REPOS/nitpick-libc/shim", "/home/randy/Workspace/REPOS/nitpick-packages/packages/nitpick-fs/shim", "/home/randy/Workspace/REPOS/nitpick-packages/packages/nitpick-input/shim"]

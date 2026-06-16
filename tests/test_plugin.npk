@@ -1,0 +1,50 @@
+use "../src/core/plugin.npk".*;
+use "../src/core/buffer.npk".*;
+use "../src/core/sys.npk".*;
+
+func:mock_on_key_press = EditorContext(EditorContext:ctx, int32:vk) {
+    if (vk == 16i32) {
+        ctx.consume_key = 1i32;
+        ctx.buf = raw buffer_insert_char_at_cursor(ctx.buf, "P");
+    }
+    pass ctx;
+};
+
+func:mock_on_load = EditorContext(EditorContext:ctx) {
+    ctx.exit_editor = 2i32; // Just a dummy value to verify modification
+    pass ctx;
+};
+
+pub func:main = int32() {
+    // 1. Setup mock EditorContext
+    EditorContext:ctx;
+    ctx.buf = raw buffer_init();
+    ctx.consume_key = 0i32;
+    ctx.exit_editor = 0i32;
+    
+    // 2. Test on_load hook
+    ctx = raw mock_on_load(ctx);
+    
+    if (ctx.exit_editor != 2i32) {
+        // sys_print("FAIL: plugin on_load did not modify context properly.\n");
+        exit 1i32;
+    }
+    
+    // 3. Test on_key_press hook
+    ctx = raw mock_on_key_press(ctx, 16i32);
+    
+    if (ctx.consume_key != 1i32) {
+        // sys_print("FAIL: plugin on_key_press did not consume key.\n");
+        exit 1i32;
+    }
+    
+    string:line = (buffer_get_line(ctx.buf, 0i32) ? "ERR");
+    // String comparison in Nitpick stdlib string.npk doesn't have "compare" - wait, we can just use `!=` 
+    if (line != "P") {
+        // sys_print("FAIL: plugin on_key_press did not modify buffer text.\n");
+        exit 1i32;
+    }
+    
+    // sys_print("PASS test_plugin\n");
+    exit 0i32;
+};

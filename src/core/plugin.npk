@@ -1,0 +1,14 @@
+use "buffer.npk".*;
+use "render.npk".*;
+
+pub struct:EditorContext = {
+    TextBuffer:buf;
+    Viewport:vp;
+    int32:consume_key;
+    int32:exit_editor;
+};
+
+// Plugin functions should implement these signatures:
+// func:on_load = EditorContext(EditorContext:ctx)
+// func:on_unload = EditorContext(EditorContext:ctx)
+// func:on_key_press = EditorContext(EditorContext:ctx, int32:vk)
