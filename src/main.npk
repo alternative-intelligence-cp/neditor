@@ -31,6 +31,9 @@ func:main = int32() {
     
     int32:prompt_mode = 0i32;
     string:search_query = "";
+    string:replace_query = "";
+    string:replace_with = "";
+    int32:replace_all = 0i32;
     
     int32:running = 1i32;
     while (running == 1i32) {
@@ -47,7 +50,7 @@ func:main = int32() {
         
         int32:rt = (render_title_bar(buf, vp) ? -1i32);
         int32:r = (render_buffer(buf, vp) ? -1i32);
-        int32:rh = (render_hint_bar(vp, prompt_mode, search_query) ? -1i32);
+        int32:rh = (render_hint_bar(vp, prompt_mode, search_query, replace_query, replace_with) ? -1i32);
         int32:rc = (render_cursor(buf, vp) ? -1i32);
         int32:f_res = (sys_flush() ? -1i32);
         
@@ -99,6 +102,140 @@ func:main = int32() {
                         } else {
                             if ((vk >= 32i32) && (vk <= 126i32)) {
                                 search_query = string_concat(search_query, string_from_char(@cast<int64>(vk)));
+                            }
+                        }
+                    }
+                }
+            } else { if (prompt_mode == 2i32) {
+                if ((vk == 3i32) || (vk == 7i32)) {
+                    prompt_mode = 0i32;
+                } else { if ((vk == 127i32) || (vk == 8i32)) {
+                    int64:sq_len = string_length(search_query);
+                    if (sq_len > 0i64) {
+                        search_query = string_substring(search_query, 0i64, sq_len - 1i64);
+                    }
+                } else { if ((vk == 10i32) || (vk == 13i32)) {
+                    prompt_mode = 0i32;
+                    int64:ln_64 = raw str_to_int(search_query);
+                    int32:line_num = @cast<int32>(ln_64);
+                    if (line_num > 0i32) {
+                        buf.cursor.row = line_num - 1i32;
+                        buf.cursor.col = 0i32;
+                        if (buf.cursor.row >= buf.count) { buf.cursor.row = buf.count - 1i32; }
+                    }
+                } else { if ((vk >= 32i32) && (vk <= 126i32)) {
+                    search_query = string_concat(search_query, string_from_char(@cast<int64>(vk)));
+                }}}}
+            } else { if (prompt_mode == 3i32) {
+                if ((vk == 3i32) || (vk == 7i32)) {
+                    prompt_mode = 0i32;
+                } else { if ((vk == 127i32) || (vk == 8i32)) {
+                    int64:sq_len = string_length(replace_query);
+                    if (sq_len > 0i64) {
+                        replace_query = string_substring(replace_query, 0i64, sq_len - 1i64);
+                    }
+                } else { if ((vk == 10i32) || (vk == 13i32)) {
+                    prompt_mode = 4i32;
+                } else { if ((vk >= 32i32) && (vk <= 126i32)) {
+                    replace_query = string_concat(replace_query, string_from_char(@cast<int64>(vk)));
+                }}}}
+            } else { if (prompt_mode == 4i32) {
+                if ((vk == 3i32) || (vk == 7i32)) {
+                    prompt_mode = 0i32;
+                } else { if ((vk == 127i32) || (vk == 8i32)) {
+                    int64:sq_len = string_length(replace_with);
+                    if (sq_len > 0i64) {
+                        replace_with = string_substring(replace_with, 0i64, sq_len - 1i64);
+                    }
+                } else { if ((vk == 10i32) || (vk == 13i32)) {
+                    prompt_mode = 5i32;
+                    replace_all = 0i32;
+                    int64:q_len = string_length(replace_query);
+                    if (q_len > 0i64) {
+                        int32:r_idx = buf.cursor.row;
+                        int32:c_idx = buf.cursor.col;
+                        int32:found = 0i32;
+                        while (r_idx < buf.count) {
+                            string:line = raw buffer_get_line(buf, r_idx);
+                            if (c_idx <= @cast<int32>(string_length(line))) {
+                                string:sub_line = string_substring(line, @cast<int64>(c_idx), string_length(line));
+                                int64:f_idx = string_index_of(sub_line, replace_query);
+                                if (f_idx >= 0i64) {
+                                    buf.cursor.row = r_idx;
+                                    buf.cursor.col = c_idx + @cast<int32>(f_idx);
+                                    found = 1i32;
+                                    r_idx = buf.count + 1i32;
+                                }
+                            }
+                            if (found == 0i32) {
+                                r_idx = r_idx + 1i32;
+                                c_idx = 0i32;
+                            }
+                        }
+                        if (found == 0i32) { prompt_mode = 0i32; }
+                    } else { prompt_mode = 0i32; }
+                } else { if ((vk >= 32i32) && (vk <= 126i32)) {
+                    replace_with = string_concat(replace_with, string_from_char(@cast<int64>(vk)));
+                }}}}
+            } else { if (prompt_mode == 5i32) {
+                if ((vk == 3i32) || (vk == 7i32)) {
+                    prompt_mode = 0i32;
+                } else {
+                    int32:do_repl = 0i32;
+                    int32:advance = 0i32;
+                    if (replace_all == 1i32) {
+                        do_repl = 1i32;
+                        advance = 1i32;
+                    } else { if ((vk == 121i32) || (vk == 89i32)) { // Y
+                        do_repl = 1i32;
+                        advance = 1i32;
+                    } else { if ((vk == 110i32) || (vk == 78i32)) { // N
+                        advance = 1i32;
+                    } else { if ((vk == 97i32) || (vk == 65i32)) { // A
+                        replace_all = 1i32;
+                        do_repl = 1i32;
+                        advance = 1i32;
+                    }}}}
+                    
+                    while (advance == 1i32) {
+                        if (do_repl == 1i32) {
+                            string:rline = raw buffer_get_line(buf, buf.cursor.row);
+                            string:left = string_substring(rline, 0i64, @cast<int64>(buf.cursor.col));
+                            string:right = string_substring(rline, @cast<int64>(buf.cursor.col) + string_length(replace_query), string_length(rline));
+                            string:nline = string_concat(left, string_concat(replace_with, right));
+                            buf = raw buffer_set_line(buf, buf.cursor.row, nline);
+                            buf.cursor.col = buf.cursor.col + @cast<int32>(string_length(replace_with));
+                        } else {
+                            buf.cursor.col = buf.cursor.col + @cast<int32>(string_length(replace_query));
+                        }
+                        advance = 0i32;
+                        
+                        int32:r_idx = buf.cursor.row;
+                        int32:c_idx = buf.cursor.col;
+                        int32:found = 0i32;
+                        while (r_idx < buf.count) {
+                            string:line = raw buffer_get_line(buf, r_idx);
+                            if (c_idx <= @cast<int32>(string_length(line))) {
+                                string:sub_line = string_substring(line, @cast<int64>(c_idx), string_length(line));
+                                int64:f_idx = string_index_of(sub_line, replace_query);
+                                if (f_idx >= 0i64) {
+                                    buf.cursor.row = r_idx;
+                                    buf.cursor.col = c_idx + @cast<int32>(f_idx);
+                                    found = 1i32;
+                                    r_idx = buf.count + 1i32;
+                                }
+                            }
+                            if (found == 0i32) {
+                                r_idx = r_idx + 1i32;
+                                c_idx = 0i32;
+                            }
+                        }
+                        if (found == 0i32) {
+                            prompt_mode = 0i32;
+                        } else {
+                            if (replace_all == 1i32) {
+                                do_repl = 1i32;
+                                advance = 1i32;
                             }
                         }
                     }
@@ -189,11 +326,24 @@ func:main = int32() {
                 prompt_mode = 1i32;
             }
             
+            // Go To Line (Ctrl+_ / 31)
+            if (vk == 31i32) {
+                prompt_mode = 2i32;
+                search_query = ""; // reuse search_query
+            }
+            
+            // Replace (Ctrl+\ / 28)
+            if (vk == 28i32) {
+                prompt_mode = 3i32;
+                replace_query = "";
+                replace_with = "";
+            }
+            
             // Adjust col when moving up/down or right
             string:cur_line = (buffer_get_line(buf, buf.cursor.row) ? "");
             int32:cur_len = @cast<int32>(string_length(cur_line));
             if (buf.cursor.col > cur_len) { buf.cursor.col = cur_len; }
-            } // end else normal mode
+            }}}}} // end else normal mode
         }
     }
     

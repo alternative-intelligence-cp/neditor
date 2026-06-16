@@ -77,7 +77,10 @@ pub func:render_title_bar = int32(TextBuffer:buf, Viewport:vp) {
     int32:m = (sys_move(0i32, 0i32) ? -1i32);
     print("\x1b[7m"); // Invert colors
     
-    string:title = "  Neditor v0.2.0";
+    string:title = "  Neditor v0.2.x ";
+    if (buf.modified == 1i32) {
+        title = string_concat(title, "[ Modified ] ");
+    }
     int32:i = @cast<int32>(string_length(title));
     print(title);
     while (i < vp.width) {
@@ -89,7 +92,7 @@ pub func:render_title_bar = int32(TextBuffer:buf, Viewport:vp) {
     pass(0i32);
 };
 
-pub func:render_hint_bar = int32(Viewport:vp, int32:prompt_mode, string:search_query) {
+pub func:render_hint_bar = int32(Viewport:vp, int32:prompt_mode, string:search_query, string:replace_query, string:replace_with) {
     if (prompt_mode == 1i32) {
         int32:m1 = (sys_move(0i32, vp.height - 2i32) ? -1i32);
         int32:c1 = (sys_clear_eol() ? -1i32);
@@ -100,6 +103,45 @@ pub func:render_hint_bar = int32(Viewport:vp, int32:prompt_mode, string:search_q
         int32:m2 = (sys_move(0i32, vp.height - 1i32) ? -1i32);
         int32:c2 = (sys_clear_eol() ? -1i32);
         print("\x1b[7m^G\x1b[0m Cancel  \x1b[7mEnter\x1b[0m Confirm");
+    } else { if (prompt_mode == 2i32) {
+        int32:m1 = (sys_move(0i32, vp.height - 2i32) ? -1i32);
+        int32:c1 = (sys_clear_eol() ? -1i32);
+        print("Enter line number, column number: ");
+        print(search_query);
+        print("_");
+        
+        int32:m2 = (sys_move(0i32, vp.height - 1i32) ? -1i32);
+        int32:c2 = (sys_clear_eol() ? -1i32);
+        print("\x1b[7m^G\x1b[0m Cancel  \x1b[7mEnter\x1b[0m Confirm");
+    } else { if (prompt_mode == 3i32) {
+        int32:m1 = (sys_move(0i32, vp.height - 2i32) ? -1i32);
+        int32:c1 = (sys_clear_eol() ? -1i32);
+        print("Search (to replace): ");
+        print(replace_query);
+        print("_");
+        
+        int32:m2 = (sys_move(0i32, vp.height - 1i32) ? -1i32);
+        int32:c2 = (sys_clear_eol() ? -1i32);
+        print("\x1b[7m^G\x1b[0m Cancel  \x1b[7mEnter\x1b[0m Confirm");
+    } else { if (prompt_mode == 4i32) {
+        int32:m1 = (sys_move(0i32, vp.height - 2i32) ? -1i32);
+        int32:c1 = (sys_clear_eol() ? -1i32);
+        print("Search (to replace): ");
+        print(replace_query);
+        
+        int32:m2 = (sys_move(0i32, vp.height - 1i32) ? -1i32);
+        int32:c2 = (sys_clear_eol() ? -1i32);
+        print("Replace with: ");
+        print(replace_with);
+        print("_");
+    } else { if (prompt_mode == 5i32) {
+        int32:m1 = (sys_move(0i32, vp.height - 2i32) ? -1i32);
+        int32:c1 = (sys_clear_eol() ? -1i32);
+        print("Replace this instance?");
+        
+        int32:m2 = (sys_move(0i32, vp.height - 1i32) ? -1i32);
+        int32:c2 = (sys_clear_eol() ? -1i32);
+        print(" \x1b[7mY\x1b[0m Yes  \x1b[7mN\x1b[0m No  \x1b[7mA\x1b[0m All  \x1b[7m^C\x1b[0m Cancel");
     } else {
         int32:m1 = (sys_move(0i32, vp.height - 2i32) ? -1i32);
         int32:c1 = (sys_clear_eol() ? -1i32);
@@ -107,7 +149,7 @@ pub func:render_hint_bar = int32(Viewport:vp, int32:prompt_mode, string:search_q
         
         int32:m2 = (sys_move(0i32, vp.height - 1i32) ? -1i32);
         int32:c2 = (sys_clear_eol() ? -1i32);
-        print("\x1b[7m^X\x1b[0m Exit      \x1b[7m^U\x1b[0m Paste Text");
-    }
+        print("\x1b[7m^X\x1b[0m Exit      \x1b[7m^U\x1b[0m Paste Text \x1b[7m^_\x1b[0m Go To Line \x1b[7m^\\\x1b[0m Replace");
+    }}}}}
     pass(0i32);
 };

@@ -9,6 +9,7 @@ pub struct:TextBuffer = {
     int64:lines_h;
     int32:count;
     Cursor:cursor;
+    int32:modified;
 };
 
 pub func:buffer_init = TextBuffer() {
@@ -20,6 +21,7 @@ pub func:buffer_init = TextBuffer() {
     c.row = 0i32;
     c.col = 0i32;
     buf.cursor = c;
+    buf.modified = 0i32;
     pass(buf);
 };
 
@@ -34,6 +36,7 @@ pub func:buffer_set_line = TextBuffer(TextBuffer:buf, int32:index, string:text) 
     if (index >= 0i32) {
         if (index < buf.count) {
             int32:dummy = ahset(buf.lines_h, string_from_int(@cast<int64>(index)), text);
+            buf.modified = 1i32;
         }
     }
     pass(buf);
@@ -49,6 +52,7 @@ pub func:buffer_insert_line = TextBuffer(TextBuffer:buf, int32:index, string:tex
     }
     int32:dummy2 = ahset(buf.lines_h, string_from_int(@cast<int64>(index)), text);
     buf.count = buf.count + 1i32;
+    buf.modified = 1i32;
     pass(buf);
 };
 
@@ -62,6 +66,7 @@ pub func:buffer_delete_line = TextBuffer(TextBuffer:buf, int32:index) {
         i = i + 1i32;
     }
     buf.count = buf.count - 1i32;
+    buf.modified = 1i32;
     pass(buf);
 };
 
