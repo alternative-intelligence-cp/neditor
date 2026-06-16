@@ -33,12 +33,15 @@ func:main = int32() {
         vp.height = @cast<int32>(size & 0xFFFFFFFFi64);
         
         // AUTO SCROLL
+        int32:text_height = vp.height - 3i32;
         if (buf.cursor.row < vp.scroll_y) { vp.scroll_y = buf.cursor.row; }
-        if (buf.cursor.row >= vp.scroll_y + vp.height) { vp.scroll_y = buf.cursor.row - vp.height + 1i32; }
+        if (buf.cursor.row >= vp.scroll_y + text_height) { vp.scroll_y = buf.cursor.row - text_height + 1i32; }
         if (buf.cursor.col < vp.scroll_x) { vp.scroll_x = buf.cursor.col; }
         if (buf.cursor.col >= vp.scroll_x + vp.width) { vp.scroll_x = buf.cursor.col - vp.width + 1i32; }
         
+        int32:rt = (render_title_bar(buf, vp) ? -1i32);
         int32:r = (render_buffer(buf, vp) ? -1i32);
+        int32:rh = (render_hint_bar(vp) ? -1i32);
         int32:rc = (render_cursor(buf, vp) ? -1i32);
         int32:f_res = (sys_flush() ? -1i32);
         
@@ -82,12 +85,12 @@ func:main = int32() {
             }
             // PageUp (Ctrl+B / 2)
             if (vk == 2i32) {
-                buf.cursor.row = buf.cursor.row - vp.height;
+                buf.cursor.row = buf.cursor.row - text_height;
                 if (buf.cursor.row < 0i32) { buf.cursor.row = 0i32; }
             }
             // PageDown (Ctrl+F / 6)
             if (vk == 6i32) {
-                buf.cursor.row = buf.cursor.row + vp.height;
+                buf.cursor.row = buf.cursor.row + text_height;
                 if (buf.cursor.row >= buf.count) { buf.cursor.row = buf.count - 1i32; }
                 if (buf.cursor.row < 0i32) { buf.cursor.row = 0i32; }
             }

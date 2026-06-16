@@ -20,9 +20,12 @@ pub func:viewport_init = Viewport(int32:w, int32:h) {
 
 pub func:render_buffer = int32(TextBuffer:buf, Viewport:vp) {
     int32:y = 0i32;
-    while (y < vp.height) {
+    int32:text_height = vp.height - 3i32;
+    if (text_height < 1i32) { pass(0i32); } // screen too small
+    
+    while (y < text_height) {
         int32:line_idx = vp.scroll_y + y;
-        int32:m = (sys_move(0i32, y) ? -1i32);
+        int32:m = (sys_move(0i32, y + 1i32) ? -1i32);
         int32:c = (sys_clear_eol() ? -1i32);
         
         if (line_idx < buf.count) {
@@ -55,16 +58,45 @@ pub func:render_buffer = int32(TextBuffer:buf, Viewport:vp) {
 pub func:render_cursor = int32(TextBuffer:buf, Viewport:vp) {
     int32:cx = buf.cursor.col - vp.scroll_x;
     int32:cy = buf.cursor.row - vp.scroll_y;
+    int32:text_height = vp.height - 3i32;
     
     if (cx >= 0i32) {
         if (cx < vp.width) {
             if (cy >= 0i32) {
-                if (cy < vp.height) {
-                    int32:m = (sys_move(cx, cy) ? -1i32);
+                if (cy < text_height) {
+                    int32:m = (sys_move(cx, cy + 1i32) ? -1i32);
                 }
             }
         }
     }
     int32:s = (sys_show_cursor() ? -1i32);
+    pass(0i32);
+};
+
+pub func:render_title_bar = int32(TextBuffer:buf, Viewport:vp) {
+    int32:m = (sys_move(0i32, 0i32) ? -1i32);
+    print("\x1b[7m"); // Invert colors
+    
+    string:title = "  Neditor v0.2.0";
+    int32:i = @cast<int32>(string_length(title));
+    print(title);
+    while (i < vp.width) {
+        print(" ");
+        i = i + 1i32;
+    }
+    
+    print("\x1b[0m"); // Reset
+    pass(0i32);
+};
+
+pub func:render_hint_bar = int32(Viewport:vp) {
+    int32:m1 = (sys_move(0i32, vp.height - 2i32) ? -1i32);
+    int32:c1 = (sys_clear_eol() ? -1i32);
+    print("\x1b[7m^G\x1b[0m Get Help  \x1b[7m^O\x1b[0m Write Out");
+    
+    int32:m2 = (sys_move(0i32, vp.height - 1i32) ? -1i32);
+    int32:c2 = (sys_clear_eol() ? -1i32);
+    print("\x1b[7m^X\x1b[0m Exit");
+    
     pass(0i32);
 };
