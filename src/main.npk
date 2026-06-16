@@ -12,6 +12,7 @@ func:main = int32() {
     int32:alt_res = (sys_alt_screen(1i32) ? -1i32);
     int32:clear_res = (sys_clear() ? -1i32);
     int32:hide_res = (sys_hide_cursor() ? -1i32);
+    int32:mouse_res = (sys_enable_mouse() ? -1i32);
     
     TextBuffer:buf;
     buf = (buffer_init() ? buf);
@@ -45,6 +46,11 @@ func:main = int32() {
     buf = ctx.buf;
     vp = ctx.vp;
     
+    int32:m_state = 0i32;
+    int32:m_cb = 0i32;
+    int32:m_cx = 0i32;
+    int32:m_cy = 0i32;
+    
     int32:running = 1i32;
     while (running == 1i32) {
         size = (sys_get_size() ? 0i64);
@@ -66,10 +72,69 @@ func:main = int32() {
         
         int32:vk = (sys_read_key() ? 0i32);
         if (vk > 0i32) {
-            ctx.buf = buf;
-            ctx.vp = vp;
-            ctx.consume_key = 0i32;
-            ctx = (registry_on_key_press(ctx, vk) ? ctx);
+            int32:handled_m = 0i32;
+            if (handled_m == 0i32) { if (m_state == 1i32) {
+                handled_m = 1i32;
+                if (vk == 91i32) { m_state = 2i32; } else { m_state = 0i32; }
+            }}
+            if (handled_m == 0i32) { if (m_state == 2i32) {
+                handled_m = 1i32;
+                if (vk == 60i32) { m_state = 3i32; m_cb = 0i32; m_cx = 0i32; m_cy = 0i32; } else { m_state = 0i32; }
+            }}
+            if (handled_m == 0i32) { if (m_state == 3i32) {
+                handled_m = 1i32;
+                if (vk == 59i32) { m_state = 4i32; } else {
+                    if ((vk >= 48i32) && (vk <= 57i32)) { m_cb = (m_cb * 10i32) + (vk - 48i32); } else { m_state = 0i32; }
+                }
+            }}
+            if (handled_m == 0i32) { if (m_state == 4i32) {
+                handled_m = 1i32;
+                if (vk == 59i32) { m_state = 5i32; } else {
+                    if ((vk >= 48i32) && (vk <= 57i32)) { m_cx = (m_cx * 10i32) + (vk - 48i32); } else { m_state = 0i32; }
+                }
+            }}
+            if (handled_m == 0i32) { if (m_state == 5i32) {
+                handled_m = 1i32;
+                if ((vk == 77i32) || (vk == 109i32)) {
+                    m_state = 0i32;
+                    if (vk == 77i32) { // Press
+                        if (m_cb == 0i32) {
+                            int32:logical_y = m_cy - 2i32;
+                            if ((logical_y >= 0i32) && (logical_y < text_height)) {
+                                buf.cursor.col = vp.scroll_x + m_cx - 1i32;
+                                buf.cursor.row = vp.scroll_y + logical_y;
+                                if (buf.cursor.row >= buf.count) { buf.cursor.row = buf.count - 1i32; }
+                                string:cur_line = (buffer_get_line(buf, buf.cursor.row) ? "");
+                                int32:cur_len = @cast<int32>(string_length(cur_line));
+                                if (buf.cursor.col > cur_len) { buf.cursor.col = cur_len; }
+                                if (buf.cursor.col < 0i32) { buf.cursor.col = 0i32; }
+                            }
+                        }
+                        if (m_cb == 64i32) {
+                            vp.scroll_y = vp.scroll_y - 3i32;
+                            if (vp.scroll_y < 0i32) { vp.scroll_y = 0i32; }
+                            buf.cursor.row = buf.cursor.row - 3i32;
+                            if (buf.cursor.row < 0i32) { buf.cursor.row = 0i32; }
+                        }
+                        if (m_cb == 65i32) {
+                            vp.scroll_y = vp.scroll_y + 3i32;
+                            buf.cursor.row = buf.cursor.row + 3i32;
+                            if (buf.cursor.row >= buf.count) { buf.cursor.row = buf.count - 1i32; }
+                        }
+                    }
+                } else {
+                    if ((vk >= 48i32) && (vk <= 57i32)) { m_cy = (m_cy * 10i32) + (vk - 48i32); } else { m_state = 0i32; }
+                }
+            }}
+            
+            if (handled_m == 0i32) { if (m_state == 0i32) {
+                if (vk == 27i32) {
+                    m_state = 1i32;
+                } else {
+                    ctx.buf = buf;
+                    ctx.vp = vp;
+                    ctx.consume_key = 0i32;
+                    ctx = (registry_on_key_press(ctx, vk) ? ctx);
             buf = ctx.buf;
             vp = ctx.vp;
             if (ctx.exit_editor != 0i32) { running = 0i32; }
@@ -413,10 +478,12 @@ func:main = int32() {
             if (buf.cursor.col > cur_len) { buf.cursor.col = cur_len; }
             }}}}}}} // end else normal mode
             }} // end else not consumed
+            }}} // end else not ESC + m_state + handled_m
         }
     }
     
     int32:show_res = (sys_show_cursor() ? -1i32);
+    int32:mouse_off = (sys_disable_mouse() ? -1i32);
     int32:alt_res_off = (sys_alt_screen(0i32) ? -1i32);
     int32:exit_raw = (sys_exit_raw() ? -1i32);
     

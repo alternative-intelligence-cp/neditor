@@ -28,3 +28,12 @@ pub func:sys_get_size = int64() { pass(nitpick_display_get_size()); };
 pub func:sys_move = int32(int32:col, int32:row) { pass(nitpick_display_move(col, row)); };
 pub func:sys_clear_eol = int32() { pass(nitpick_display_clear_eol()); };
 
+pub func:sys_enable_mouse = int32() {
+    print("\x1b[?1000h\x1b[?1015h\x1b[?1006h");
+    pass sys_flush();
+};
+
+pub func:sys_disable_mouse = int32() {
+    print("\x1b[?1006l\x1b[?1015l\x1b[?1000l");
+    pass sys_flush();
+};
