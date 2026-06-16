@@ -13,6 +13,7 @@ func:main = int32() {
     int32:clear_res = (sys_clear() ? -1i32);
     int32:hide_res = (sys_hide_cursor() ? -1i32);
     int32:mouse_res = (sys_enable_mouse() ? -1i32);
+    int32:winch_res = (sys_hook_sigwinch() ? -1i32);
     
     TextBuffer:buf;
     buf = (buffer_init() ? buf);
@@ -54,8 +55,14 @@ func:main = int32() {
     int32:running = 1i32;
     while (running == 1i32) {
         size = (sys_get_size() ? 0i64);
-        vp.width = @cast<int32>(size >> 32i64);
-        vp.height = @cast<int32>(size & 0xFFFFFFFFi64);
+        int32:new_w = @cast<int32>(size >> 32i64);
+        int32:new_h = @cast<int32>(size & 0xFFFFFFFFi64);
+        
+        if ((new_w != vp.width) || (new_h != vp.height)) {
+            int32:c_res = (sys_clear() ? -1i32);
+        }
+        vp.width = new_w;
+        vp.height = new_h;
         
         // AUTO SCROLL
         int32:text_height = vp.height - 3i32;

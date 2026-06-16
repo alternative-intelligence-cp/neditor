@@ -14,6 +14,7 @@ extern "libc" {
     func:nitpick_display_clear_eol = int32();
     func:read = int32(int32:fd, int64:buf, int64:count);
     func:write = int32(int32:fd, int64:buf, int64:count);
+    func:neditor_hook_sigwinch = int32();
 }
 
 pub func:sys_enter_raw = int32() { pass(nitpick_display_enter_raw()); };
@@ -27,6 +28,7 @@ pub func:sys_read_key = int32() { pass(nitpick_input_read_key()); };
 pub func:sys_get_size = int64() { pass(nitpick_display_get_size()); };
 pub func:sys_move = int32(int32:col, int32:row) { pass(nitpick_display_move(col, row)); };
 pub func:sys_clear_eol = int32() { pass(nitpick_display_clear_eol()); };
+pub func:sys_hook_sigwinch = int32() { pass(neditor_hook_sigwinch()); };
 
 pub func:sys_enable_mouse = int32() {
     print("\x1b[?1000h\x1b[?1015h\x1b[?1006h");
