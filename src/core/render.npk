@@ -142,6 +142,26 @@ pub func:render_hint_bar = int32(Viewport:vp, int32:prompt_mode, string:search_q
         int32:m2 = (sys_move(0i32, vp.height - 1i32) ? -1i32);
         int32:c2 = (sys_clear_eol() ? -1i32);
         print(" \x1b[7mY\x1b[0m Yes  \x1b[7mN\x1b[0m No  \x1b[7mA\x1b[0m All  \x1b[7m^C\x1b[0m Cancel");
+    } else { if (prompt_mode == 6i32) {
+        int32:m1 = (sys_move(0i32, vp.height - 2i32) ? -1i32);
+        int32:c1 = (sys_clear_eol() ? -1i32);
+        print("File Name to Write: ");
+        print(search_query);
+        print("_");
+        
+        int32:m2 = (sys_move(0i32, vp.height - 1i32) ? -1i32);
+        int32:c2 = (sys_clear_eol() ? -1i32);
+        print("\x1b[7m^G\x1b[0m Cancel  \x1b[7mEnter\x1b[0m Confirm");
+    } else { if (prompt_mode == 7i32) {
+        int32:m1 = (sys_move(0i32, vp.height - 2i32) ? -1i32);
+        int32:c1 = (sys_clear_eol() ? -1i32);
+        print("File Name to Read: ");
+        print(search_query);
+        print("_");
+        
+        int32:m2 = (sys_move(0i32, vp.height - 1i32) ? -1i32);
+        int32:c2 = (sys_clear_eol() ? -1i32);
+        print("\x1b[7m^G\x1b[0m Cancel  \x1b[7mEnter\x1b[0m Confirm");
     } else {
         int32:m1 = (sys_move(0i32, vp.height - 2i32) ? -1i32);
         int32:c1 = (sys_clear_eol() ? -1i32);
@@ -150,6 +170,6 @@ pub func:render_hint_bar = int32(Viewport:vp, int32:prompt_mode, string:search_q
         int32:m2 = (sys_move(0i32, vp.height - 1i32) ? -1i32);
         int32:c2 = (sys_clear_eol() ? -1i32);
         print("\x1b[7m^X\x1b[0m Exit      \x1b[7m^U\x1b[0m Paste Text \x1b[7m^_\x1b[0m Go To Line \x1b[7m^\\\x1b[0m Replace");
-    }}}}}
+    }}}}}}}
     pass(0i32);
 };

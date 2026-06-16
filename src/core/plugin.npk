@@ -12,3 +12,5 @@ pub struct:EditorContext = {
 // func:on_load = EditorContext(EditorContext:ctx)
 // func:on_unload = EditorContext(EditorContext:ctx)
 // func:on_key_press = EditorContext(EditorContext:ctx, int32:vk)
+// func:on_save = EditorContext(EditorContext:ctx)
+// func:on_load_file = EditorContext(EditorContext:ctx)

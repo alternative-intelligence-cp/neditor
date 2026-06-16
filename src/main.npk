@@ -41,7 +41,7 @@ func:main = int32() {
     ctx.vp = vp;
     ctx.consume_key = 0i32;
     ctx.exit_editor = 0i32;
-    ctx = raw registry_on_load(ctx);
+    ctx = (registry_on_load(ctx) ? ctx);
     buf = ctx.buf;
     vp = ctx.vp;
     
@@ -69,7 +69,7 @@ func:main = int32() {
             ctx.buf = buf;
             ctx.vp = vp;
             ctx.consume_key = 0i32;
-            ctx = raw registry_on_key_press(ctx, vk);
+            ctx = (registry_on_key_press(ctx, vk) ? ctx);
             buf = ctx.buf;
             vp = ctx.vp;
             if (ctx.exit_editor != 0i32) { running = 0i32; }
@@ -258,6 +258,44 @@ func:main = int32() {
                         }
                     }
                 }
+            } else { if (prompt_mode == 6i32) {
+                if ((vk == 3i32) || (vk == 7i32)) {
+                    prompt_mode = 0i32;
+                } else { if ((vk == 127i32) || (vk == 8i32)) {
+                    int64:sq_len = string_length(search_query);
+                    if (sq_len > 0i64) {
+                        search_query = string_substring(search_query, 0i64, sq_len - 1i64);
+                    }
+                } else { if ((vk == 10i32) || (vk == 13i32)) {
+                    prompt_mode = 0i32;
+                    ctx.buf = buf;
+                    ctx.vp = vp;
+                    ctx = (registry_on_save(ctx) ? ctx);
+                    buf = ctx.buf;
+                    vp = ctx.vp;
+                    int32:res = (buffer_save_to_file(buf, search_query) ? -1i32);
+                } else { if ((vk >= 32i32) && (vk <= 126i32)) {
+                    search_query = string_concat(search_query, string_from_char(@cast<int64>(vk)));
+                }}}}
+            } else { if (prompt_mode == 7i32) {
+                if ((vk == 3i32) || (vk == 7i32)) {
+                    prompt_mode = 0i32;
+                } else { if ((vk == 127i32) || (vk == 8i32)) {
+                    int64:sq_len = string_length(search_query);
+                    if (sq_len > 0i64) {
+                        search_query = string_substring(search_query, 0i64, sq_len - 1i64);
+                    }
+                } else { if ((vk == 10i32) || (vk == 13i32)) {
+                    prompt_mode = 0i32;
+                    buf = (buffer_load_from_file(search_query) ? buf);
+                    ctx.buf = buf;
+                    ctx.vp = vp;
+                    ctx = (registry_on_load_file(ctx) ? ctx);
+                    buf = ctx.buf;
+                    vp = ctx.vp;
+                } else { if ((vk >= 32i32) && (vk <= 126i32)) {
+                    search_query = string_concat(search_query, string_from_char(@cast<int64>(vk)));
+                }}}}
             } else {
 
             // 'q' is 113, 'Ctrl+X' is 24
@@ -357,11 +395,23 @@ func:main = int32() {
                 replace_with = "";
             }
             
+            // Save File (Ctrl+S / 19)
+            if (vk == 19i32) {
+                prompt_mode = 6i32;
+                search_query = ""; // reuse search_query
+            }
+            
+            // Load File (Ctrl+O / 15)
+            if (vk == 15i32) {
+                prompt_mode = 7i32;
+                search_query = ""; // reuse search_query
+            }
+            
             // Adjust col when moving up/down or right
             string:cur_line = (buffer_get_line(buf, buf.cursor.row) ? "");
             int32:cur_len = @cast<int32>(string_length(cur_line));
             if (buf.cursor.col > cur_len) { buf.cursor.col = cur_len; }
-            }}}}} // end else normal mode
+            }}}}}}} // end else normal mode
             }} // end else not consumed
         }
     }

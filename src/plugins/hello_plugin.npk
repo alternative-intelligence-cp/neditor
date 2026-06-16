@@ -23,3 +23,11 @@ pub func:hello_plugin_on_key_press = EditorContext(EditorContext:ctx, int32:vk) 
     }
     pass ctx;
 };
+
+pub func:hello_plugin_on_save = EditorContext(EditorContext:ctx) {
+    pass ctx;
+};
+
+pub func:hello_plugin_on_load_file = EditorContext(EditorContext:ctx) {
+    pass ctx;
+};
