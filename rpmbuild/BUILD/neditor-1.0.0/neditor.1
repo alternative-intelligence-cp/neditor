@@ -1,0 +1,78 @@
+.TH NEDITOR 1 "June 2026" "Neditor v1.0.0" "User Commands"
+.SH NAME
+neditor \- an advanced TUI text editor written completely in Nitpick
+
+.SH SYNOPSIS
+.B neditor
+[\fIFILENAME\fR]
+
+.SH DESCRIPTION
+.B neditor
+is a fast, extensible, and modal text editor built entirely using the Nitpick programming language.
+It runs in standard terminals and uses ANSI escape codes to render its TUI and process keyboard and mouse input.
+
+.SH FEATURES
+.TP
+.B Modal Editing
+Supports distinct modes for different tasks (Normal mode, Insert mode, Command mode, Search mode).
+.TP
+.B Mouse Support
+Native terminal mouse tracking (click to move cursor, scroll wheel to scroll the viewport).
+.TP
+.B Terminal Resize Support (SIGWINCH)
+Dynamically adapts its viewport when the terminal emulator window is resized.
+.TP
+.B Plugin System
+Includes an extensible plugin architecture.
+
+.SH KEYBINDINGS
+.SS Normal Mode
+.TP
+.B h, j, k, l
+Move cursor left, down, up, and right.
+.TP
+.B i
+Enter Insert mode.
+.TP
+.B :
+Enter Command mode.
+.TP
+.B /
+Enter Search mode.
+.TP
+.B ctrl+s
+Save the current file.
+.TP
+.B ctrl+q
+Quit neditor.
+
+.SS Insert Mode
+.TP
+.B ESC
+Return to Normal mode.
+.TP
+.B Backspace
+Delete character at the cursor.
+.TP
+.B Enter
+Insert a newline.
+
+.SS Command Mode
+.TP
+.B :w
+Save file.
+.TP
+.B :q
+Quit (can also use :wq to save and quit).
+.TP
+.B :s/foo/bar
+Replace all occurrences of "foo" with "bar".
+
+.SH BUGS
+No known bugs. File loading may leak a tiny amount of string memory per file loaded due to language constraints, but this does not affect runtime stability.
+
+.SH AUTHOR
+Randy and the Nitpick community.
+
+.SH LICENSE
+AGPL v3

@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=Neditor
+Comment=Advanced TUI text editor written completely in Nitpick
+Exec=neditor %F
+Icon=utilities-terminal
+Terminal=true
+Type=Application
+Categories=Utility;TextEditor;
+Keywords=text;editor;tui;
