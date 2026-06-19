@@ -1,6 +1,10 @@
 #include <signal.h>
 #include <stddef.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 static void sigwinch_handler(int sig) {
     (void)sig;
     // Dummy handler to interrupt blocking I/O
@@ -44,3 +48,26 @@ int neditor_pop_key(void) {
     pthread_mutex_unlock(&queue_mtx);
     return key;
 }
+
+extern int nitpick_input_read_key(void);
+
+static void* input_worker_thread(void* arg) {
+    (void)arg;
+    while (1) {
+        int vk = nitpick_input_read_key();
+        if (vk > 0) {
+            neditor_push_key(vk);
+        }
+    }
+    return NULL;
+}
+
+void neditor_start_input_thread(void) {
+    pthread_t th;
+    pthread_create(&th, NULL, input_worker_thread, NULL);
+    pthread_detach(th);
+}
+
+#ifdef __cplusplus
+}
+#endif

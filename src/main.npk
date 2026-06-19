@@ -56,16 +56,7 @@ func:main = int32() {
     int32:m_cx = 0i32;
     int32:m_cy = 0i32;
     
-    (int64)(int64):input_worker = int64(int64:arg) {
-        while (g_running == 1i32) {
-            int32:vk = (sys_read_key() ? 0i32);
-            if (vk > 0i32) {
-                neditor_push_key(vk);
-            }
-        }
-        pass 0i64;
-    };
-    int64:input_th = npk_shim_thread_spawn(input_worker, 0i64);
+    drop(sys_start_input_thread());
     
     while (g_running == 1i32) {
         size = (sys_get_size() ? 0i64);
@@ -384,12 +375,28 @@ func:main = int32() {
                 }}}}
             } else {
 
-            // 'q' is 113, 'Ctrl+X' is 24
-            if (vk == 113i32) {
+            // 'Ctrl+Q' is 17, 'Ctrl+X' is 24
+            if (vk == 17i32) {
                 g_running = 0i32;
             }
             if (vk == 24i32) {
                 g_running = 0i32;
+            }
+            
+            // Backspace (8 or 127)
+            if ((vk == 8i32) || (vk == 127i32)) {
+                buf = raw buffer_delete_char_at_cursor(buf);
+            }
+            
+            // Enter (10 or 13)
+            if ((vk == 10i32) || (vk == 13i32)) {
+                buf = raw buffer_newline_at_cursor(buf);
+            }
+            
+            // Normal characters (ASCII 32 to 126)
+            if ((vk >= 32i32) && (vk <= 126i32)) {
+                string:ch = string_from_char(@cast<int64>(vk));
+                buf = raw buffer_insert_char_at_cursor(buf, ch);
             }
             // UP
             if (vk == 200i32) {

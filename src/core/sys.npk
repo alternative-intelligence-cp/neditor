@@ -17,7 +17,13 @@ extern "libc" {
     func:neditor_hook_sigwinch = int32();
     func:neditor_push_key = void(int32:key);
     func:neditor_pop_key = int32();
+    func:neditor_start_input_thread = void();
 }
+
+pub func:sys_start_input_thread = NIL() {
+    neditor_start_input_thread();
+    pass NIL;
+};
 
 pub func:sys_enter_raw = int32() { pass(nitpick_display_enter_raw()); };
 pub func:sys_exit_raw = int32() { pass(nitpick_display_exit_raw()); };
