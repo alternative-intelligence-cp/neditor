@@ -14,8 +14,8 @@ pub func:hello_plugin_on_key_press = EditorContext(EditorContext:ctx, int32:vk) 
     if (vk == 16i32) {
         string:msg = " [Plugin Activated!] ";
         int32:i = 0i32;
-        while (i < @cast<int32>(string_length(msg))) {
-            string:ch = string_substring(msg, @cast<int64>(i), @cast<int64>(i) + 1i64);
+        while (i < @cast_unchecked<int32>(string_length(msg))) {
+            string:ch = string_substring(msg, @cast_unchecked<int64>(i), @cast_unchecked<int64>(i) + 1i64);
             ctx.buf = raw buffer_insert_char_at_cursor(ctx.buf, ch);
             i = i + 1i32;
         }

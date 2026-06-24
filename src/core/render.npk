@@ -32,7 +32,7 @@ pub func:render_buffer = int32(TextBuffer:buf, Viewport:vp) {
         if (line_idx < buf.count) {
             string:line = (buffer_get_line(buf, line_idx) ? "");
             int64:len = string_length(line);
-            int32:len32 = @cast<int32>(len);
+            int32:len32 = @cast_unchecked<int32>(len);
             
             if (vp.scroll_x < len32) {
                 int32:rem = len32 - vp.scroll_x;
@@ -81,7 +81,7 @@ pub func:render_title_bar = int32(TextBuffer:buf, Viewport:vp) {
     if (buf.modified == 1i32) {
         title = string_concat(title, "[ Modified ] ");
     }
-    int32:i = @cast<int32>(string_length(title));
+    int32:i = @cast_unchecked<int32>(string_length(title));
     print(title);
     while (i < vp.width) {
         print(" ");

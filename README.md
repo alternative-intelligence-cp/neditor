@@ -55,6 +55,14 @@ AGPL v3
 ## Nitpick Ecosystem
 
 This repository is part of the [Nitpick](https://github.com/alternative-intelligence-cp/nitpick) ecosystem. 
+## Building from source
+
+You will need the [`nitpick-build` build system](https://github.com/alternative-intelligence-cp/nitpick-build) installed and available as `npkbld`. 
+You will also need the `npkc` compiler (version `0.61.x` or later) to build.
+
+1. Clone the repository
+2. Run `make`
+3. The binary will be output to `.nitpick_make/build/neditor`
 - 🌍 **[Nitpick-Lang Hub](https://github.com/alternative-intelligence-cp/nitpick-lang)** — The central hub connecting all Nitpick projects.
 - 📖 **[Official Web Documentation](https://ai-liberation-platform.org/nitpick/docs/)** — Guides, references, and language specifications.
 - 🛠️ **[Nitpick Compiler](https://github.com/alternative-intelligence-cp/nitpick)** — The core language and toolchain.

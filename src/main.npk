@@ -1,4 +1,4 @@
-func:failsafe = int32(tbb32:err) { exit 1; };
+func:failsafe = int32(tbb32:err) { drop(err); exit 1i32; };
 
 use "core/buffer.npk".*;
 use "core/file_io.npk".*;
@@ -12,12 +12,12 @@ use "/home/randy/Workspace/REPOS/nitpick-packages/packages/nitpick-thread/src/ni
 int32:g_running = 1i32;
 
 func:main = int32() {
-    int32:init_res = (sys_enter_raw() ? -1i32);
-    int32:alt_res = (sys_alt_screen(1i32) ? -1i32);
-    int32:clear_res = (sys_clear() ? -1i32);
-    int32:hide_res = (sys_hide_cursor() ? -1i32);
-    int32:mouse_res = (sys_enable_mouse() ? -1i32);
-    int32:winch_res = (sys_hook_sigwinch() ? -1i32);
+    int32:init_res = (sys_enter_raw() ? -1i32); drop(init_res);
+    int32:alt_res = (sys_alt_screen(1i32) ? -1i32); drop(alt_res);
+    int32:clear_res = (sys_clear() ? -1i32); drop(clear_res);
+    int32:hide_res = (sys_hide_cursor() ? -1i32); drop(hide_res);
+    int32:mouse_res = (sys_enable_mouse() ? -1i32); drop(mouse_res);
+    int32:winch_res = (sys_hook_sigwinch() ? -1i32); drop(winch_res);
     
     TextBuffer:buf;
     buf = (buffer_init() ? buf);
@@ -27,11 +27,12 @@ func:main = int32() {
     buf = (buffer_insert_line(buf, 3i32, "A very long line that might exceed the terminal width to test wrapping and truncation of the viewport.") ? buf);
     
     int64:size = (sys_get_size() ? 0i64);
-    int32:term_w = @cast<int32>(size >> 32i64);
-    int32:term_h = @cast<int32>(size & 0xFFFFFFFFi64);
+    int32:term_w = @cast_unchecked<int32>(size >> 32i64);
+    int32:term_h = @cast_unchecked<int32>(size & 0xFFFFFFFFi64);
     
     Viewport:vp;
     vp = (viewport_init(term_w, term_h) ? vp);
+    drop(term_w); drop(term_h);
     
     TextBuffer:clipboard = raw buffer_init();
     int32:last_was_cut = 0i32;
@@ -60,8 +61,8 @@ func:main = int32() {
     
     while (g_running == 1i32) {
         size = (sys_get_size() ? 0i64);
-        int32:new_w = @cast<int32>(size >> 32i64);
-        int32:new_h = @cast<int32>(size & 0xFFFFFFFFi64);
+        int32:new_w = @cast_unchecked<int32>(size >> 32i64);
+        int32:new_h = @cast_unchecked<int32>(size & 0xFFFFFFFFi64);
         
         if ((new_w != vp.width) || (new_h != vp.height)) {
             int32:c_res = (sys_clear() ? -1i32);
@@ -117,7 +118,7 @@ func:main = int32() {
                                 buf.cursor.row = vp.scroll_y + logical_y;
                                 if (buf.cursor.row >= buf.count) { buf.cursor.row = buf.count - 1i32; }
                                 string:cur_line = (buffer_get_line(buf, buf.cursor.row) ? "");
-                                int32:cur_len = @cast<int32>(string_length(cur_line));
+                                int32:cur_len = @cast_unchecked<int32>(string_length(cur_line));
                                 if (buf.cursor.col > cur_len) { buf.cursor.col = cur_len; }
                                 if (buf.cursor.col < 0i32) { buf.cursor.col = 0i32; }
                             }
@@ -171,19 +172,19 @@ func:main = int32() {
                                 int32:r_idx = buf.cursor.row;
                                 int32:c_idx = buf.cursor.col + 1i32;
                                 string:cur_line = raw buffer_get_line(buf, r_idx);
-                                if (c_idx >= @cast<int32>(string_length(cur_line))) {
+                                if (c_idx >= @cast_unchecked<int32>(string_length(cur_line))) {
                                     r_idx = r_idx + 1i32;
                                     c_idx = 0i32;
                                 }
                                 int32:found = 0i32;
                                 while (r_idx < buf.count) {
                                     string:line = raw buffer_get_line(buf, r_idx);
-                                    if (c_idx <= @cast<int32>(string_length(line))) {
-                                        string:sub_line = string_substring(line, @cast<int64>(c_idx), string_length(line));
+                                    if (c_idx <= @cast_unchecked<int32>(string_length(line))) {
+                                        string:sub_line = string_substring(line, @cast_unchecked<int64>(c_idx), string_length(line));
                                         int64:f_idx = string_index_of(sub_line, search_query);
                                         if (f_idx >= 0i64) {
                                             buf.cursor.row = r_idx;
-                                            buf.cursor.col = c_idx + @cast<int32>(f_idx);
+                                            buf.cursor.col = c_idx + @cast_unchecked<int32>(f_idx);
                                             found = 1i32;
                                             r_idx = buf.count + 1i32; // break
                                         }
@@ -196,7 +197,7 @@ func:main = int32() {
                             }
                         } else {
                             if ((vk >= 32i32) && (vk <= 126i32)) {
-                                search_query = string_concat(search_query, string_from_char(@cast<int64>(vk)));
+                                search_query = string_concat(search_query, string_from_char(@cast_unchecked<int64>(vk)));
                             }
                         }
                     }
@@ -212,14 +213,14 @@ func:main = int32() {
                 } else { if ((vk == 10i32) || (vk == 13i32)) {
                     prompt_mode = 0i32;
                     int64:ln_64 = raw str_to_int(search_query);
-                    int32:line_num = @cast<int32>(ln_64);
+                    int32:line_num = @cast_unchecked<int32>(ln_64);
                     if (line_num > 0i32) {
                         buf.cursor.row = line_num - 1i32;
                         buf.cursor.col = 0i32;
                         if (buf.cursor.row >= buf.count) { buf.cursor.row = buf.count - 1i32; }
                     }
                 } else { if ((vk >= 32i32) && (vk <= 126i32)) {
-                    search_query = string_concat(search_query, string_from_char(@cast<int64>(vk)));
+                    search_query = string_concat(search_query, string_from_char(@cast_unchecked<int64>(vk)));
                 }}}}
             } else { if (prompt_mode == 3i32) {
                 if ((vk == 3i32) || (vk == 7i32)) {
@@ -232,7 +233,7 @@ func:main = int32() {
                 } else { if ((vk == 10i32) || (vk == 13i32)) {
                     prompt_mode = 4i32;
                 } else { if ((vk >= 32i32) && (vk <= 126i32)) {
-                    replace_query = string_concat(replace_query, string_from_char(@cast<int64>(vk)));
+                    replace_query = string_concat(replace_query, string_from_char(@cast_unchecked<int64>(vk)));
                 }}}}
             } else { if (prompt_mode == 4i32) {
                 if ((vk == 3i32) || (vk == 7i32)) {
@@ -252,12 +253,12 @@ func:main = int32() {
                         int32:found = 0i32;
                         while (r_idx < buf.count) {
                             string:line = raw buffer_get_line(buf, r_idx);
-                            if (c_idx <= @cast<int32>(string_length(line))) {
-                                string:sub_line = string_substring(line, @cast<int64>(c_idx), string_length(line));
+                            if (c_idx <= @cast_unchecked<int32>(string_length(line))) {
+                                string:sub_line = string_substring(line, @cast_unchecked<int64>(c_idx), string_length(line));
                                 int64:f_idx = string_index_of(sub_line, replace_query);
                                 if (f_idx >= 0i64) {
                                     buf.cursor.row = r_idx;
-                                    buf.cursor.col = c_idx + @cast<int32>(f_idx);
+                                    buf.cursor.col = c_idx + @cast_unchecked<int32>(f_idx);
                                     found = 1i32;
                                     r_idx = buf.count + 1i32;
                                 }
@@ -270,7 +271,7 @@ func:main = int32() {
                         if (found == 0i32) { prompt_mode = 0i32; }
                     } else { prompt_mode = 0i32; }
                 } else { if ((vk >= 32i32) && (vk <= 126i32)) {
-                    replace_with = string_concat(replace_with, string_from_char(@cast<int64>(vk)));
+                    replace_with = string_concat(replace_with, string_from_char(@cast_unchecked<int64>(vk)));
                 }}}}
             } else { if (prompt_mode == 5i32) {
                 if ((vk == 3i32) || (vk == 7i32)) {
@@ -295,13 +296,13 @@ func:main = int32() {
                     while (advance == 1i32) {
                         if (do_repl == 1i32) {
                             string:rline = raw buffer_get_line(buf, buf.cursor.row);
-                            string:left = string_substring(rline, 0i64, @cast<int64>(buf.cursor.col));
-                            string:right = string_substring(rline, @cast<int64>(buf.cursor.col) + string_length(replace_query), string_length(rline));
+                            string:left = string_substring(rline, 0i64, @cast_unchecked<int64>(buf.cursor.col));
+                            string:right = string_substring(rline, @cast_unchecked<int64>(buf.cursor.col) + string_length(replace_query), string_length(rline));
                             string:nline = string_concat(left, string_concat(replace_with, right));
                             buf = raw buffer_set_line(buf, buf.cursor.row, nline);
-                            buf.cursor.col = buf.cursor.col + @cast<int32>(string_length(replace_with));
+                            buf.cursor.col = buf.cursor.col + @cast_unchecked<int32>(string_length(replace_with));
                         } else {
-                            buf.cursor.col = buf.cursor.col + @cast<int32>(string_length(replace_query));
+                            buf.cursor.col = buf.cursor.col + @cast_unchecked<int32>(string_length(replace_query));
                         }
                         advance = 0i32;
                         
@@ -310,12 +311,12 @@ func:main = int32() {
                         int32:found = 0i32;
                         while (r_idx < buf.count) {
                             string:line = raw buffer_get_line(buf, r_idx);
-                            if (c_idx <= @cast<int32>(string_length(line))) {
-                                string:sub_line = string_substring(line, @cast<int64>(c_idx), string_length(line));
+                            if (c_idx <= @cast_unchecked<int32>(string_length(line))) {
+                                string:sub_line = string_substring(line, @cast_unchecked<int64>(c_idx), string_length(line));
                                 int64:f_idx = string_index_of(sub_line, replace_query);
                                 if (f_idx >= 0i64) {
                                     buf.cursor.row = r_idx;
-                                    buf.cursor.col = c_idx + @cast<int32>(f_idx);
+                                    buf.cursor.col = c_idx + @cast_unchecked<int32>(f_idx);
                                     found = 1i32;
                                     r_idx = buf.count + 1i32;
                                 }
@@ -352,7 +353,7 @@ func:main = int32() {
                     vp = ctx.vp;
                     int32:res = (buffer_save_to_file(buf, search_query) ? -1i32);
                 } else { if ((vk >= 32i32) && (vk <= 126i32)) {
-                    search_query = string_concat(search_query, string_from_char(@cast<int64>(vk)));
+                    search_query = string_concat(search_query, string_from_char(@cast_unchecked<int64>(vk)));
                 }}}}
             } else { if (prompt_mode == 7i32) {
                 if ((vk == 3i32) || (vk == 7i32)) {
@@ -371,7 +372,7 @@ func:main = int32() {
                     buf = ctx.buf;
                     vp = ctx.vp;
                 } else { if ((vk >= 32i32) && (vk <= 126i32)) {
-                    search_query = string_concat(search_query, string_from_char(@cast<int64>(vk)));
+                    search_query = string_concat(search_query, string_from_char(@cast_unchecked<int64>(vk)));
                 }}}}
             } else {
 
@@ -395,7 +396,7 @@ func:main = int32() {
             
             // Normal characters (ASCII 32 to 126)
             if ((vk >= 32i32) && (vk <= 126i32)) {
-                string:ch = string_from_char(@cast<int64>(vk));
+                string:ch = string_from_char(@cast_unchecked<int64>(vk));
                 buf = raw buffer_insert_char_at_cursor(buf, ch);
             }
             // UP
@@ -425,7 +426,7 @@ func:main = int32() {
             // End (Ctrl+E / 5)
             if (vk == 5i32) {
                 string:line = (buffer_get_line(buf, buf.cursor.row) ? "");
-                buf.cursor.col = @cast<int32>(string_length(line));
+                buf.cursor.col = @cast_unchecked<int32>(string_length(line));
             }
             // PageUp (Ctrl+B / 2)
             if (vk == 2i32) {
@@ -502,7 +503,7 @@ func:main = int32() {
             
             // Adjust col when moving up/down or right
             string:cur_line = (buffer_get_line(buf, buf.cursor.row) ? "");
-            int32:cur_len = @cast<int32>(string_length(cur_line));
+            int32:cur_len = @cast_unchecked<int32>(string_length(cur_line));
             if (buf.cursor.col > cur_len) { buf.cursor.col = cur_len; }
             }}}}}}} // end else normal mode
             }} // end else not consumed
@@ -512,10 +513,10 @@ func:main = int32() {
         }
     }
     
-    int32:show_res = (sys_show_cursor() ? -1i32);
-    int32:mouse_off = (sys_disable_mouse() ? -1i32);
-    int32:alt_res_off = (sys_alt_screen(0i32) ? -1i32);
-    int32:exit_raw = (sys_exit_raw() ? -1i32);
+    int32:show_res = (sys_show_cursor() ? -1i32); drop(show_res);
+    int32:mouse_off = (sys_disable_mouse() ? -1i32); drop(mouse_off);
+    int32:alt_res_off = (sys_alt_screen(0i32) ? -1i32); drop(alt_res_off);
+    int32:exit_raw = (sys_exit_raw() ? -1i32); drop(exit_raw);
     
     exit 0;
 };

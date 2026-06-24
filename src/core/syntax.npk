@@ -2,7 +2,7 @@ use "../stdlib/string.npk".*;
 
 func:byte_at = int32(string:s, int64:idx) {
     int64:c = str_byte_at(s, idx) ? 0i64;
-    pass @cast<int32>(c);
+    pass @cast_unchecked<int32>(c);
 };
 
 func:is_alpha = bool(int32:c) {
@@ -47,8 +47,8 @@ func:is_type = bool(string:w) {
 pub func:syntax_print_line = int32(string:line, int32:scroll_x, int32:max_width) {
     int64:len = string_length(line);
     int64:i = 0i64;
-    int64:end_col = @cast<int64>(scroll_x + max_width);
-    int64:sx = @cast<int64>(scroll_x);
+    int64:end_col = @cast_unchecked<int64>(scroll_x + max_width);
+    int64:sx = @cast_unchecked<int64>(scroll_x);
     
     while (i < len) {
         if (i >= end_col) {

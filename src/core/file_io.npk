@@ -21,11 +21,11 @@ pub func:buffer_load_from_file = TextBuffer(string:path) {
     int64:count = (str_split_count(sp) ? 0i64);
     
     if (count > 0i64) {
-        buf.count = @cast<int32>(count);
+        buf.count = @cast_unchecked<int32>(count);
         
         int32:i = 0i32;
         while (i < buf.count) {
-            string:line = (str_split_get(sp, @cast<int64>(i)) ? "");
+            string:line = (str_split_get(sp, @cast_unchecked<int64>(i)) ? "");
             buf = (buffer_set_line(buf, i, line) ? buf);
             i = i + 1i32;
         }
