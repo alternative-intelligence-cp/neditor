@@ -7,6 +7,7 @@ type = "binary"
 sources = ["src/main.npk"]
 deps = []
 flags = [
+    "-picky",
     "-I", "src",
     "-I", "/home/randy/Workspace/REPOS/nitpick-packages/packages/nitpick-fs/src",
     "-I", "/home/randy/Workspace/REPOS/nitpick-packages/packages/nitpick-thread/src"
@@ -19,6 +20,7 @@ type = "binary"
 sources = ["tests/test_main.npk"]
 deps = []
 flags = [
+    "-picky",
     "-I", "src",
     "-I", "/home/randy/Workspace/REPOS/nitpick-packages/packages/nitpick-fs/src",
     "-I", "/home/randy/Workspace/REPOS/nitpick-packages/packages/nitpick-thread/src"
@@ -31,6 +33,7 @@ type = "binary"
 sources = ["tests/test_buffer.npk"]
 deps = []
 flags = [
+    "-picky",
     "-I", "src",
     "-I", "/home/randy/Workspace/REPOS/nitpick-packages/packages/nitpick-fs/src",
     "-I", "/home/randy/Workspace/REPOS/nitpick-packages/packages/nitpick-thread/src"
@@ -43,6 +46,7 @@ type = "binary"
 sources = ["tests/test_file_io.npk"]
 deps = []
 flags = [
+    "-picky",
     "-I", "src",
     "-I", "/home/randy/Workspace/REPOS/nitpick-packages/packages/nitpick-fs/src",
     "-I", "/home/randy/Workspace/REPOS/nitpick-packages/packages/nitpick-thread/src"
@@ -55,6 +59,7 @@ type = "binary"
 sources = ["tests/test_plugin.npk"]
 deps = []
 flags = [
+    "-picky",
     "-I", "src",
     "-I", "/home/randy/Workspace/REPOS/nitpick-packages/packages/nitpick-fs/src",
     "-I", "/home/randy/Workspace/REPOS/nitpick-packages/packages/nitpick-thread/src"
